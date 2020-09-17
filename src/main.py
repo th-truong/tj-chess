@@ -11,6 +11,7 @@ if __name__ == "__main__":
     ex.show()
     sys.exit(app.exec_())
 
+
 def python_chess_ex():
     pgn = open(pc.LICHESS_DB / "lichess_elite_2013-09.pgn", encoding="utf-8")
 
@@ -24,5 +25,6 @@ def python_chess_ex():
     board = first_game.board()
     for move in first_game.mainline_moves():
         board.push(move)
+        board
 
     board
