@@ -1,9 +1,13 @@
+import sys
+from pathlib import Path
+from PyQt5.QtWidgets import QApplication
+
+import chess.pgn
+
 import proj_constants as pc
 from gui import pyqt_classes
 
-from pathlib import Path
-from PyQt5.QtWidgets import QApplication
-import chess.pgn
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
