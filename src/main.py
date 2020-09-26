@@ -1,34 +1,23 @@
+import config as cfg
+from gui import pyqt_classes
+from scripts import display_gui
+
 import sys
 from pathlib import Path
-from PyQt5.QtWidgets import QApplication
 
+import chess
+import chess.engine
 import chess.pgn
-
-import proj_constants as pc
-from gui import pyqt_classes
-
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    ex = pyqt_classes.chessMainWindow()
-    ex.show()
-    sys.exit(app.exec_())
+    display_gui()
+    # engine = chess.engine.SimpleEngine.popen_uci(str(cfg.STOCKFISH_ENGINE_PATH))
 
+    # board = chess.Board()
+    # while not board.is_game_over():
+    #     result = engine.play(board, chess.engine.Limit(time=0.1))
+    #     board.push(result.move)
+    #     print(board)
 
-def python_chess_ex():
-    pgn = open(pc.LICHESS_DB / "lichess_elite_2013-09.pgn", encoding="utf-8")
-
-    first_game = chess.pgn.read_game(pgn)
-    second_game = chess.pgn.read_game(pgn)
-
-    first_game.headers["Event"]
-    'IBM Man-Machine, New York USA'
-
-    # Iterate through all moves and play them on a board.
-    board = first_game.board()
-    for move in first_game.mainline_moves():
-        board.push(move)
-        board
-
-    board
+    # engine.quit()
