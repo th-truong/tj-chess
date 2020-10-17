@@ -11,7 +11,7 @@ import chess.pgn
 
 
 if __name__ == "__main__":
-    display_gui()
+    # display_gui()
     # engine = chess.engine.SimpleEngine.popen_uci(str(cfg.STOCKFISH_ENGINE_PATH))
 
     # board = chess.Board()
@@ -21,3 +21,4 @@ if __name__ == "__main__":
     #     print(board)
 
     # engine.quit()
+
