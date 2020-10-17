@@ -13,6 +13,8 @@ import config as cfg
 class chessMainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        if not cfg.LICHESS_DB.exists() or not cfg.LICHESS_DB.exists():
+            raise ValueError("The paths in config.py need to be configured for your system.")
         self.title = 'Chess Viewer and Player'
         self.left = 0
         self.top = 0
@@ -52,7 +54,7 @@ class chessTabs(QWidget):
         fname = Path(str(fname[0]))
         self.viewer_pgn_file_txt.setText(str(fname))
 
-        if Path(self.viewer_pgn_file_txt.text()).exists:
+        if Path(self.viewer_pgn_file_txt.text()).exists() and Path(self.viewer_pgn_file_txt.text()).suffix == '.pgn':
             # open game file
             pgn_file = open(Path(self.viewer_pgn_file_txt.text()))
             self.viewer_games = []
