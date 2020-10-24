@@ -10,4 +10,8 @@ class MoveLoader(torch.utils.data.IterableDataset):
         self.board = board
         self.engine = engine
 
-    def __iter__():
+    def __iter__(self):
+        worker_info = torch.utils.data.get_worker_info()
+        if work_info is None: # single process loading
+            pass
+        else:
