@@ -15,10 +15,19 @@ class NetInterpreter():
 
         offsets = self.moves_list[move]
 
-        if column + offsets[1] < 0 or row + offsets[0] < 0 or column + offsets[1] > 7 or row + offsets[0] > 7:
+        if (column + offsets[1] < 0 or row + offsets[0] < 0 or
+            column + offsets[1] > 7 or row + offsets[0] > 7):  # for out of bounds moves
+            final_position = "INVALID"
+        elif 64 <= move <= 72 and self.rows[row] != '7':  # for illegal promotions
             final_position = "INVALID"
         else:
             final_position = self.columns[column + offsets[1]] + self.rows[row + offsets[0]]
+            if 64 <= move <= 66:  # these are the rook promotions
+                final_position += "r"
+            elif 67 <= move <= 69:  # knight promos
+                final_position += "n"
+            elif 70 <= move <= 72:  # bishop promos
+                final_position += "b"
 
         return starting_position + final_position
 
@@ -56,16 +65,18 @@ class NetInterpreter():
 
         # pawn underpromotions, we will default to a queen promotion so we need to encode
         # forward + left diagonal + right diagonal underpromotions to knights, rooks, and bishops
-        # this includes the final 64->73 planes
+        # an example UCI notation for this is "g7g8x"
+        # where x is q for queen, n for knight, r for rook, and b for bishop
+        # this includes the final 64->72 planes
         pawn_underpromos = []
         pawn_underpromos.append((1,0))  # N move to rook
-        pawn_underpromos.append((1,0))  # N move to knight
-        pawn_underpromos.append((1,0))  # N move to bishop
         pawn_underpromos.append((1,1))  # NE move to rook
-        pawn_underpromos.append((1,1))  # NE move to knight
-        pawn_underpromos.append((1,1))  # NE move to bishop
         pawn_underpromos.append((1,-1))  # NW move to rook
+        pawn_underpromos.append((1,0))  # N move to knight
+        pawn_underpromos.append((1,1))  # NE move to knight
         pawn_underpromos.append((1,-1))  # NW move to knight
+        pawn_underpromos.append((1,0))  # N move to bishop
+        pawn_underpromos.append((1,1))  # NE move to bishop
         pawn_underpromos.append((1,-1))  # NW move to bishop
 
         all_moves = queen_moves + knight_moves + pawn_underpromos
