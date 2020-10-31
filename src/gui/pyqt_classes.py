@@ -79,7 +79,7 @@ class chessTabs(QWidget):
         self.viewer_current_game_moves_txt.insertPlainText(str(self.viewer_current_game))
 
         # load in mainline moves
-        self.viewer_mainline_moves = [move for move in self.viewer_current_game.viewer_mainline_moves()]
+        self.viewer_mainline_moves = [move for move in self.viewer_current_game.mainline_moves()]
         # used to track which move the display is currently at
         self.viewer_move_counter = 0
 
