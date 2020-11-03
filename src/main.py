@@ -14,9 +14,10 @@ import chess.pgn
 
 
 if __name__ == "__main__":
-    display_gui()
+    # display_gui()
 
     # dataset = pt_loader.MoveLoader()
     # foo = list(torch.utils.data.DataLoader(dataset, num_workers=4, worker_init_fn=pt_loader.worker_init_fn))
 
-    # interpreter = noi.NetInterpreter()
+    interpreter = noi.NetInterpreter()
+    noi.test_interpreter(interpreter)
