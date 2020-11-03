@@ -6,8 +6,6 @@ import torch
 import numpy as np
 
 
-
-
 class MoveLoader(torch.utils.data.IterableDataset):
     def __init__(self, dataset_path=cfg.LICHESS_DB):
         super(MoveLoader).__init__()
