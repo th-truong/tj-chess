@@ -4,9 +4,10 @@ import os
 import numpy as np
 import chess.pgn
 
+import config as cfg
 
-HISTORY = 8
-SIZE = (8,8)
+HISTORY = cfg.HISTORY
+SIZE = cfg.SIZE
 
 
 class MetaLayers(object):
@@ -80,7 +81,7 @@ def game_to_layers(game):
                     board.pop()
             except IndexError:
                 board = None
-        
+
         layers = np.array(all_board_layers)
         meta_layers = MetaLayers(meta, layers)
         yield meta_layers
@@ -93,7 +94,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('path')
     args = parser.parse_args()
-    
+
     np.set_printoptions(threshold=np.inf)
 
     with open(args.path) as f:
@@ -108,6 +109,7 @@ if __name__ == '__main__':
                 print('next move: %s' % (meta_layers.meta.next_move))
                 print(meta_layers.layers[0])
                 print(meta_layers.layers[6])
+                print(meta_layers.layers.shape)
                 if i == 2:
                     break
             break

@@ -18,3 +18,7 @@ SE_CHANNELS = 32
 FILTERS = 128
 
 INPUT_SIZE = [112, 8, 8]
+
+# input sizes
+HISTORY = 8
+SIZE = (8, 8)
