@@ -19,5 +19,12 @@ if __name__ == "__main__":
     # dataset = pt_loader.MoveLoader()
     # foo = list(torch.utils.data.DataLoader(dataset, num_workers=4, worker_init_fn=pt_loader.worker_init_fn))
 
-    interpreter = noi.NetInterpreter()
-    noi.test_interpreter(interpreter)
+    # interpreter = noi.NetInterpreter()
+    # noi.test_interpreter(interpreter)
+
+    from network_utils.model_modules import create_vrb_model
+
+    model = create_vrb_model()
+    model.eval()
+    input_tensor = torch.zeros([2, 112, 8, 8])
+    out = model(input_tensor)

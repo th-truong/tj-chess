@@ -52,8 +52,7 @@ class NetInterpreter():
 
         offsets = self.moves_list[move]
 
-        if (column + offsets[1] < 0 or row + offsets[0] < 0 or
-            column + offsets[1] > 7 or row + offsets[0] > 7):  # for out of bounds moves
+        if (column + offsets[1] < 0 or row + offsets[0] < 0 or column + offsets[1] > 7 or row + offsets[0] > 7):  # for out of bounds moves
             move = "INVALID"
         elif 64 <= move <= 72 and self.rows[row] != self.rows[-2]:  # for illegal promotions
             move = "INVALID"
@@ -100,7 +99,7 @@ class NetInterpreter():
                 move_index = self.moves_list[64:67].index(offsets) + 64
             elif promotion == "n":  # knight promos
                 move_index = self.moves_list[67:70].index(offsets) + 67
-            elif promotion == "b": # bishop promos
+            elif promotion == "b":  # bishop promos
                 move_index = self.moves_list[70:73].index(offsets) + 70
 
         return start_column, start_row, move_index
@@ -155,6 +154,7 @@ class NetInterpreter():
         all_moves = queen_moves + knight_moves + pawn_underpromos
 
         return all_moves
+
 
 def test_interpreter(interpreter):
     interpreter.set_colour_to_play("white")
