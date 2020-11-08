@@ -1,20 +1,20 @@
+import sys
+from pathlib import Path
+
+import torch
+import numpy as np
+import chess
+import chess.engine
+import chess.pgn
+from tqdm import tqdm
+from torch.utils.tensorboard import SummaryWriter
+
 import config as cfg
 from gui import pyqt_classes
 from data_utils import pt_loader
 from network_utils import network_out_interpreter as noi
 from network_utils.model_modules import create_vrb_model
 from scripts import display_gui
-
-import sys
-from pathlib import Path
-import torch
-from torch.utils.tensorboard import SummaryWriter
-import numpy as np
-from tqdm import tqdm
-
-import chess
-import chess.engine
-import chess.pgn
 
 
 if __name__ == "__main__":
