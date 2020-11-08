@@ -6,6 +6,7 @@ import chess
 
 from data_utils import layer_builder
 import config as cfg
+from network_utils import network_out_interpreter as noi
 
 
 class MoveLoader(torch.utils.data.IterableDataset):
@@ -25,6 +26,8 @@ class MoveLoader(torch.utils.data.IterableDataset):
         # worker_pgn_files is reassigned in worker_init_fn if multiple workers are used
         self.worker_pgn_files = self.all_pgn_files
 
+        self.move_interpreter = noi.NetInterpreter()
+
     def __iter__(self):
         # torch.utils.data.DataLoader doesn't handle the Pathlib objects, so convert to a string
         files_list = [str(pgn_file) for pgn_file in self.worker_pgn_files]
@@ -33,7 +36,7 @@ class MoveLoader(torch.utils.data.IterableDataset):
                 game = chess.pgn.read_game(f)
                 while game is not None:
                     for meta_layer in layer_builder.game_to_layers(game):
-                        next_move = str(meta_layer.meta.next_move)
+                        next_move = torch.Tensor(self.move_interpreter.interpret_UCI_move(str(meta_layer.meta.next_move)))
                         turn = meta_layer.meta.turn
 
                         # the result scalar will be [current player winning, draw, other player winning]
