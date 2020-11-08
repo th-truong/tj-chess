@@ -47,6 +47,7 @@ def board_to_layers(board, meta):
             board_layers.append(np.ones(SIZE))
         else:
             board_layers.append(np.zeros(SIZE))
+    return board_layers
 
 
 def game_to_layers(game):
