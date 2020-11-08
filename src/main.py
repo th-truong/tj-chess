@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import argparse
 
 import torch
 import numpy as np
@@ -18,8 +19,13 @@ from scripts import display_gui
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--log-dir', default=cfg.LOG_DIR)
+    parser.add_argument('--lichess-db', default=cfg.LICHESS_DB)
+    args = parser.parse_args()
+
     # start tensorboard logging
-    writer = SummaryWriter(log_dir=cfg.LOG_DIR)
+    writer = SummaryWriter(log_dir=args.log_dir)
 
     # create model
     model = create_vrb_model()
@@ -31,7 +37,7 @@ if __name__ == "__main__":
     interpreter = noi.NetInterpreter()
 
     # load dataset objects
-    dataset = pt_loader.MoveLoader()
+    dataset = pt_loader.MoveLoader(args.lichess_db)
     pt_dataloader = torch.utils.data.DataLoader(dataset, batch_size=cfg.BATCH_SIZE,
                                                 num_workers=cfg.LOADER_WORKERS, worker_init_fn=pt_loader.worker_init_fn)
 
