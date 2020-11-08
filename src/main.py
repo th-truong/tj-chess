@@ -1,3 +1,17 @@
+#!/usr/bin/env python
+import sys
+from pathlib import Path
+import argparse
+import shutil
+
+import torch
+import numpy as np
+import chess
+import chess.engine
+import chess.pgn
+from tqdm import tqdm
+from torch.utils.tensorboard import SummaryWriter
+
 import config as cfg
 from gui import pyqt_classes
 from data_utils import pt_loader
@@ -5,21 +19,20 @@ from network_utils import network_out_interpreter as noi
 from network_utils.model_modules import create_vrb_model
 from scripts import display_gui
 
-import sys
-from pathlib import Path
-import torch
-from torch.utils.tensorboard import SummaryWriter
-import numpy as np
-from tqdm import tqdm
-
-import chess
-import chess.engine
-import chess.pgn
-
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--gui', action='store_true')
+    parser.add_argument('--log-dir', default=cfg.LOG_DIR)
+    parser.add_argument('--lichess-db', default=cfg.LICHESS_DB)
+    parser.add_argument('--stockfish-exe', default=shutil.which('stockfish'))
+    args = parser.parse_args()
+
+    if args.gui:
+        display_gui(args)
+
     # start tensorboard logging
-    writer = SummaryWriter(log_dir=cfg.LOG_DIR)
+    writer = SummaryWriter(log_dir=args.log_dir)
 
     # create model
     model = create_vrb_model()
@@ -31,7 +44,7 @@ if __name__ == "__main__":
     interpreter = noi.NetInterpreter()
 
     # load dataset objects
-    dataset = pt_loader.MoveLoader()
+    dataset = pt_loader.MoveLoader(args.lichess_db)
     pt_dataloader = torch.utils.data.DataLoader(dataset, batch_size=cfg.BATCH_SIZE,
                                                 num_workers=cfg.LOADER_WORKERS, worker_init_fn=pt_loader.worker_init_fn)
 

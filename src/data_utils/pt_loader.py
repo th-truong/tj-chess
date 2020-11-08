@@ -10,7 +10,7 @@ from network_utils import network_out_interpreter as noi
 
 
 class MoveLoader(torch.utils.data.IterableDataset):
-    def __init__(self, dataset_path=cfg.LICHESS_DB):
+    def __init__(self, dataset_path):
         super(MoveLoader).__init__()
         if not dataset_path.exists():
             raise ValueError(f"{str(dataset_path)} does not exist, please configure config.py to point to a valid path.")

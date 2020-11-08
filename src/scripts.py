@@ -8,9 +8,9 @@ import config as cfg
 from gui import pyqt_classes
 
 
-def display_gui():
+def display_gui(args):
     app = QApplication(sys.argv)
-    ex = pyqt_classes.chessMainWindow()
+    ex = pyqt_classes.chessMainWindow(args.lichess_db, args.stockfish_exe)
     ex.show()
     sys.exit(app.exec_())
 

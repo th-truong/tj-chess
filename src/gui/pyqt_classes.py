@@ -11,10 +11,9 @@ import config as cfg
 
 
 class chessMainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, lichess_db, stockfish_exe):
         super().__init__()
-        if not cfg.LICHESS_DB.exists() or not cfg.LICHESS_DB.exists():
-            raise ValueError("The paths in config.py need to be configured for your system.")
+
         self.title = 'Chess Viewer and Player'
         self.left = 0
         self.top = 0
@@ -23,15 +22,19 @@ class chessMainWindow(QMainWindow):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
-        self.tab_widget = chessTabs(self)
+        self.tab_widget = chessTabs(self, lichess_db, stockfish_exe)
         self.setCentralWidget(self.tab_widget)
 
         self.show()
 
 
 class chessTabs(QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, lichess_db, stockfish_exe):
         super(QWidget, self).__init__(parent)
+
+        self.lichess_db = lichess_db
+        self.stockfish_exe = stockfish_exe
+
         self.layout = QGridLayout(self)
 
         self.tabs = QTabWidget()
@@ -50,7 +53,7 @@ class chessTabs(QWidget):
 
     def viewer_open_file_btn_click(self):
         # get file path
-        fname = QFileDialog.getOpenFileName(self, 'Open file', str(cfg.LICHESS_DB), "PGN files (*.pgn)")
+        fname = QFileDialog.getOpenFileName(self, 'Open file', str(self.lichess_db), "PGN files (*.pgn)")
         fname = Path(str(fname[0]))
         self.viewer_pgn_file_txt.setText(str(fname))
 
@@ -195,7 +198,7 @@ class chessTabs(QWidget):
         self.player_tab.setLayout(self.player_tab.layout)
 
         # initialize and load engine
-        self.engine = chess.engine.SimpleEngine.popen_uci(str(cfg.STOCKFISH_ENGINE_PATH))
+        self.engine = chess.engine.SimpleEngine.popen_uci(self.stockfish_exe)
 
         # SVG display for board
         self.player_SVG_widget = QSvgWidget(parent=self)
