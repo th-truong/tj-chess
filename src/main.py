@@ -79,8 +79,11 @@ if __name__ == "__main__":
             target_policies.append(target_policy)
         target_policies = torch.stack(target_policies)
 
-        policy_loss = loss_fn_policy(pred_policies, target_policies.to(device))
-        value_loss = loss_fn_value(pred_values, targets['result'])
+        target_policies_labels = torch.argmax(torch.flatten(target_policies, start_dim=1, end_dim=-1), dim=1)
+        pred_policies = torch.flatten(pred_policies, start_dim=1, end_dim=-1)
+
+        policy_loss = loss_fn_policy(pred_policies, target_policies_labels.to(device))
+        value_loss = loss_fn_value(pred_values, torch.argmax(targets['result'], dim=1))
         total_loss = 0.99 * policy_loss + 0.01 * value_loss
 
         writer.add_scalar('loss/train', total_loss, current_step)
@@ -97,7 +100,6 @@ if __name__ == "__main__":
             'optimizer': optimizer.state_dict(),
             "global_step": current_step
             }, str(current_step+1) + "_steps.tar")
-
 
         if current_step == num_steps:
             break
