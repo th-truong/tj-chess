@@ -61,6 +61,8 @@ if __name__ == "__main__":
         if current_step == 0:
             # set the learning rate very low for warm up
             optimizer.defaults['lr'] = learning_rate / 100
+            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=cfg.SCHEDULER_PATIENCE,
+                                                                   factor=cfg.SCHEDULER_FACTOR)
         elif current_step == cfg.WARM_UP_STEPS:
             optimizer.defaults['lr'] = learning_rate
             scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=cfg.SCHEDULER_PATIENCE,
