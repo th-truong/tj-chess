@@ -8,11 +8,12 @@ import numpy as np
 def create_vrb_model():
 
     input_module = TJInputModule()
+    value_head = ValueHead()
     body = TJSEBlockBody()
     model = TJChessModel(input_module=input_module,
                          body=body,
                          policy_head=None,
-                         value_head=None)
+                         value_head=value_head)
 
     return model
 
@@ -35,11 +36,9 @@ class TJChessModel(torch.nn.Module):
         body_out = self.body(molded_input_board)
 
         # policy = self.policy_head(body_out)
-
-        # value = self.value_head(body_out)
-
         policy = body_out
-        value = None
+
+        value = self.value_head(body_out)    
 
         return policy, value, targets
 
@@ -119,3 +118,28 @@ class SEBlock(torch.nn.Module):
 
         se_block_out = self.relu1(SE_out)
         return se_block_out
+
+
+class ValueHead(torch.nn.Module):
+
+    def __init__(self, num_filters=cfg.FILTERS):
+        super(ValueHead, self).__init__()
+        self.num_filters = num_filters
+
+        self.conv2d_0 = torch.nn.Conv2d(self.num_filters, 32,
+                                kernel_size=3, padding=1, stride=1)
+        self.conv2d_1 = torch.nn.Conv2d(32, 128,
+                                        kernel_size=8, padding=0, stride=1)
+        self.relu1 = torch.nn.ReLU(inplace=True)
+        self.fc0 = torch.nn.Linear(128, 3)
+        self.sm0 = torch.nn.Softmax()
+
+    def forward(self, input_tensor):
+        conv2d_0_out = self.conv2d_0(input_tensor)
+        conv2d_1_out = self.conv2d_1(conv2d_0_out)
+        relu1_out = self.relu1(conv2d_1_out).squeeze(2).squeeze(2)
+
+        fc0_out = self.fc0(relu1_out)
+        value_head_out = self.sm0(fc0_out)
+        
+        return value_head_out
