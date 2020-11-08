@@ -55,8 +55,6 @@ if __name__ == "__main__":
     loss_fn_policy = torch.nn.MSELoss()
     loss_fn_value = torch.nn.MSELoss()
 
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=cfg.SCHEDULER_PATIENCE,
-                                                           factor=cfg.SCHEDULER_FACTOR)
     num_steps = cfg.MAX_ITERATIONS
 
     for current_step, out in tqdm(enumerate(pt_dataloader)):
@@ -66,6 +64,8 @@ if __name__ == "__main__":
         elif current_step == cfg.WARM_UP_STEPS:
             optimizer.defaults['lr'] = learning_rate
 
+            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=cfg.SCHEDULER_PATIENCE,
+                                                                   factor=cfg.SCHEDULER_FACTOR)
         moves = out[0].to(device)
         targets = {k: v.to(device) for k, v in out[1].items()}
 
