@@ -52,8 +52,8 @@ if __name__ == "__main__":
     learning_rate = cfg.LEARNING_RATE
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
-    loss_fn_policy = torch.nn.MSELoss()
-    loss_fn_value = torch.nn.MSELoss()
+    loss_fn_policy = torch.nn.CrossEntropyLoss()
+    loss_fn_value = torch.nn.CrossEntropyLoss()
 
     num_steps = cfg.MAX_ITERATIONS
 
@@ -63,7 +63,6 @@ if __name__ == "__main__":
             optimizer.defaults['lr'] = learning_rate / 100
         elif current_step == cfg.WARM_UP_STEPS:
             optimizer.defaults['lr'] = learning_rate
-
             scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=cfg.SCHEDULER_PATIENCE,
                                                                    factor=cfg.SCHEDULER_FACTOR)
         moves = out[0].to(device)

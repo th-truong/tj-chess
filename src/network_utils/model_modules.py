@@ -37,7 +37,7 @@ class TJChessModel(torch.nn.Module):
         body_out = self.body(molded_input_board)
 
         policy = self.policy_head(body_out)
-        value = self.value_head(body_out)    
+        value = self.value_head(body_out)
 
         return policy, value, targets
 
@@ -139,8 +139,14 @@ class ValueHead(torch.nn.Module):
         relu1_out = self.relu1(conv2d_1_out).squeeze(2).squeeze(2)
 
         fc0_out = self.fc0(relu1_out)
-        value_head_out = self.sm0(fc0_out)
-        
+
+        if self.training:
+            # for training we do no use the softmax because torch.nn.CrossEntropyLoss applies a log-softmax
+            # TODO: add this as a layer into the network later and just return losses when self.training is true
+            value_head_out = fc0_out
+        else:
+            value_head_out = self.sm0(fc0_out)
+
         return value_head_out
 
 
