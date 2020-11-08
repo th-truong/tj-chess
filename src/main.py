@@ -38,7 +38,10 @@ if __name__ == "__main__":
     # configure training parameters
     learning_rate = cfg.LEARNING_RATE
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-    loss_fn = torch.nn.BCELoss()
+
+    loss_fn_policy = torch.nn.MSELoss()
+    loss_fn_value = torch.nn.MSELoss()
+
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=cfg.SCHEDULER_PATIENCE,
                                                            factor=cfg.SCHEDULER_FACTOR)
     num_steps = cfg.MAX_ITERATIONS
@@ -50,17 +53,28 @@ if __name__ == "__main__":
         elif i == cfg.WARM_UP_STEPS:
             optimizer.defaults['lr'] = learning_rate
 
-        moves = [move.to(device) for move in out[0]]
-        targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+        moves = out[0].to(device)
+        targets = {k: v.to(device) for k, v in out[1].items()}
 
-        pred_move, loss = model(move, targets)
+        pred_policies, pred_values, targets = model(moves, targets)
 
-        writer.add_scalar('loss/train', loss, i)
+        target_policies = []
+        for i, next_move in enumerate(targets['next_move']):
+            target_policy = torch.zeros(73,8,8)
+            target_policy[int(next_move[2]), int(next_move[0]), int(next_move[1])] = 1
+            target_policies.append(target_policy)
+        target_policies = torch.stack(target_policies)
+
+        policy_loss = loss_fn_policy(pred_policies, target_policies)
+        value_loss = loss_fn_value(pred_values, targets['result'])
+        total_loss = 0.99 * policy_loss + 0.01 * value_loss
+
+        writer.add_scalar('loss/train', total_loss, i)
 
         optimizer.zero_grad()
-        loss.backward()
+        total_loss.backward()
         optimizer.step()
-        scheduler.step(loss)  # must call this after the optimizer step
+        scheduler.step(total_loss)  # must call this after the optimizer step
 
         if i == num_steps:
             break
