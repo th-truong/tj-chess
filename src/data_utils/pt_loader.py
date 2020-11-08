@@ -36,8 +36,12 @@ class MoveLoader(torch.utils.data.IterableDataset):
                 game = chess.pgn.read_game(f)
                 while game is not None:
                     for meta_layer in layer_builder.game_to_layers(game):
-                        next_move = torch.Tensor(self.move_interpreter.interpret_UCI_move(str(meta_layer.meta.next_move)))
                         turn = meta_layer.meta.turn
+                        if turn == chess.WHITE:
+                            self.move_interpreter.set_colour_to_play("white")
+                        else:
+                            self.move_interpreter.set_colour_to_play("black")
+                        next_move = torch.Tensor(self.move_interpreter.interpret_UCI_move(str(meta_layer.meta.next_move)))
 
                         # the result scalar will be [current player winning, draw, other player winning]
                         if meta_layer.meta.result == "1-0":
