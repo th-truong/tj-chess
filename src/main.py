@@ -46,11 +46,11 @@ if __name__ == "__main__":
                                                            factor=cfg.SCHEDULER_FACTOR)
     num_steps = cfg.MAX_ITERATIONS
 
-    for i, out in tqdm(enumerate(pt_dataloader)):
-        if i == 0:
+    for current_step, out in tqdm(enumerate(pt_dataloader)):
+        if current_step == 0:
             # set the learning rate very low for warm up
-            optimizer.defaults['lr'] = learning_rate / 1000
-        elif i == cfg.WARM_UP_STEPS:
+            optimizer.defaults['lr'] = learning_rate / 100
+        elif current_step == cfg.WARM_UP_STEPS:
             optimizer.defaults['lr'] = learning_rate
 
         moves = out[0].to(device)
@@ -65,16 +65,25 @@ if __name__ == "__main__":
             target_policies.append(target_policy)
         target_policies = torch.stack(target_policies)
 
-        policy_loss = loss_fn_policy(pred_policies, target_policies)
+        policy_loss = loss_fn_policy(pred_policies, target_policies.to(device))
         value_loss = loss_fn_value(pred_values, targets['result'])
         total_loss = 0.99 * policy_loss + 0.01 * value_loss
 
-        writer.add_scalar('loss/train', total_loss, i)
+        writer.add_scalar('loss/train', total_loss, current_step)
+        writer.add_scalar('lr', optimizer.defaults['lr'], current_step)
 
         optimizer.zero_grad()
         total_loss.backward()
         optimizer.step()
         scheduler.step(total_loss)  # must call this after the optimizer step
 
-        if i == num_steps:
+        if current_step % 5000 == 0:
+            torch.save({
+            'model': model.state_dict(),
+            'optimizer': optimizer.state_dict(),
+            "global_step": current_step
+            }, str(current_step+1) + "_steps.tar")
+
+
+        if current_step == num_steps:
             break
