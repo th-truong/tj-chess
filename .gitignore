@@ -7,3 +7,4 @@ stockfish*
 lichess_elite_db/
 Lichess Elite Database/
 data/
+*_tensorboard/

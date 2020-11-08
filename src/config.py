@@ -22,3 +22,14 @@ INPUT_SIZE = [112, 8, 8]
 # input sizes
 HISTORY = 8
 SIZE = (8, 8)
+
+# ********** Training Parameters ********** #
+LEARNING_RATE = 0.001
+BATCH_SIZE = 1000
+LOADER_WORKERS = 4
+MAX_ITERATIONS = 200000
+WARM_UP_STEPS = 10000
+SCHEDULER_PATIENCE = 10
+SCHEDULER_FACTOR = 0.5
+
+LOG_DIR = Path(r"D:\paper_repos\tj-chess\first_model_tensorboard")
