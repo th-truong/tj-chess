@@ -132,7 +132,7 @@ class ValueHead(torch.nn.Module):
                                         kernel_size=8, padding=0, stride=1)
         self.relu1 = torch.nn.ReLU(inplace=True)
         self.fc0 = torch.nn.Linear(128, 3)
-        self.sm0 = torch.nn.Softmax()
+        self.sm0 = torch.nn.Softmax(1)
 
     def forward(self, input_tensor):
         conv2d_0_out = self.conv2d_0(input_tensor)
