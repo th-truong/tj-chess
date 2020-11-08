@@ -18,14 +18,16 @@ if __name__ == "__main__":
     # display_gui()
 
     dataset = pt_loader.MoveLoader()
-    foo = torch.utils.data.DataLoader(dataset, batch_size=1, num_workers=4, worker_init_fn=pt_loader.worker_init_fn)
-    for out in foo:
-        print(out)
+    foo = torch.utils.data.DataLoader(dataset, batch_size=2, num_workers=4, worker_init_fn=pt_loader.worker_init_fn)
+    for i, out in enumerate(foo):
+        print(out[1])
+        if i == 50:
+            break
     # interpreter = noi.NetInterpreter()
     # noi.test_interpreter(interpreter)
 
     # from network_utils.model_modules import create_vrb_model
-    # from data_utils import layer_builder
+    from data_utils import layer_builder
 
     # # model = create_vrb_model()
     # # model.eval()

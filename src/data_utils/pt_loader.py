@@ -30,11 +30,31 @@ class MoveLoader(torch.utils.data.IterableDataset):
         files_list = [str(pgn_file) for pgn_file in self.worker_pgn_files]
         for file in files_list:
             with open(file) as f:
-                for game in chess.pgn.read_game(f):
-                    if game is None:
-                        break
+                game = chess.pgn.read_game(f)
+                while game is not None:
                     for meta_layer in layer_builder.game_to_layers(game):
-                        yield meta_layer.layers
+                        next_move = str(meta_layer.meta.next_move)
+                        turn = meta_layer.meta.turn
+
+                        # the result scalar will be [current player winning, draw, other player winning]
+                        if meta_layer.meta.result == "1-0":
+                            if turn == chess.WHITE:
+                                result = torch.Tensor([1, 0, 0])
+                            else:
+                                result = torch.Tensor([0, 0, 1])
+                        elif meta_layer.meta.result == "0-1":
+                            if turn == chess.BLACK:
+                                result = torch.Tensor([1, 0, 0])
+                            else:
+                                result = torch.Tensor([0, 0, 1])
+                        else:
+                            result = torch.Tensor([0, 1, 0])
+
+                        targets = {"next_move": next_move,
+                                   "result": result}
+                        input_tensor = torch.from_numpy(meta_layer.layers.astype(np.float32))
+                        yield input_tensor, targets
+                    game = chess.pgn.read_game(f)
 
 
 def worker_init_fn(worker_id):
