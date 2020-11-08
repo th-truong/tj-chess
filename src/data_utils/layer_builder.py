@@ -8,6 +8,7 @@ import config as cfg
 
 HISTORY = cfg.HISTORY
 SIZE = cfg.SIZE
+REPETITIONS = 2
 
 
 class MetaLayers(object):
@@ -25,7 +26,7 @@ class Meta(object):
 
 def board_to_layers(board, meta):
     if board is None:
-        return [np.zeros(SIZE) for _ in range(len(chess.COLORS) * len(chess.PIECE_TYPES) + 2)]
+        return [np.zeros(SIZE) for _ in range(len(chess.COLORS) * len(chess.PIECE_TYPES) + REPETITIONS)]
 
     if meta.turn == chess.WHITE:
         colors = [chess.WHITE, chess.BLACK]
@@ -40,22 +41,12 @@ def board_to_layers(board, meta):
             # transform uint64 -> 8x8 np array
             layer = np.unpackbits(np.array(np.uint64(pieces)).view(dtype=np.uint8, type=np.matrix)).reshape(SIZE)
             board_layers.append(layer)
-    if board.is_repetition(0):
-        board_layers.extend((
-            np.zeros(SIZE),
-            np.zeros(SIZE),
-        ))
-    elif board.is_repetition(1):
-        board_layers.extend((
-            np.ones(SIZE),
-            np.zeros(SIZE),
-        ))
-    else:
-        board_layers.extend((
-            np.ones(SIZE),
-            np.ones(SIZE),
-        ))
-    return board_layers
+
+    for i in range(REPETITIONS):
+        if board.is_repetition(i+1):
+            board_layers.append(np.ones(SIZE))
+        else:
+            board_layers.append(np.zeros(SIZE))
 
 
 def game_to_layers(game):
