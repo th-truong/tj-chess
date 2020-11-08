@@ -4,7 +4,6 @@ import torch
 import config as cfg
 import numpy as np
 
-
 def create_vrb_model():
 
     input_module = TJInputModule()

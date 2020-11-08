@@ -1,9 +1,11 @@
 """[summary]
 """
-import config as cfg
-
 import torch
 import numpy as np
+import chess
+
+from data_utils import layer_builder
+import config as cfg
 
 
 class MoveLoader(torch.utils.data.IterableDataset):
@@ -25,8 +27,14 @@ class MoveLoader(torch.utils.data.IterableDataset):
 
     def __iter__(self):
         # torch.utils.data.DataLoader doesn't handle the Pathlib objects, so convert to a string
-        foo = [str(pgn_file) for pgn_file in self.worker_pgn_files]
-        return iter(foo)
+        files_list = [str(pgn_file) for pgn_file in self.worker_pgn_files]
+        for file in files_list:
+            with open(file) as f:
+                for game in chess.pgn.read_game(f):
+                    if game is None:
+                        break
+                    for meta_layer in layer_builder.game_to_layers(game):
+                        yield meta_layer.layers
 
 
 def worker_init_fn(worker_id):
