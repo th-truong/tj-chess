@@ -26,10 +26,10 @@ SIZE = (8, 8)
 # ********** Training Parameters ********** #
 LEARNING_RATE = 0.001
 BATCH_SIZE = 2048
-LOADER_WORKERS = 4
+LOADER_WORKERS = 8
 MAX_ITERATIONS = 500000
-WARM_UP_STEPS = 2500
+WARM_UP_STEPS = 5000
 SCHEDULER_PATIENCE = 10
 SCHEDULER_FACTOR = 0.5
 
-LOG_DIR = Path(r"D:\paper_repos\tj-chess\first_model_tensorboard")
+LOG_DIR = Path(r"D:\paper_repos\tj-chess\CE_loss_model_tensorboard")
