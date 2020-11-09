@@ -21,6 +21,7 @@ if __name__ == "__main__":
     parser.add_argument('--training', action='store_true')
     parser.add_argument('--log-dir', default=cfg.LOG_DIR)
     parser.add_argument('--lichess-db', default=cfg.LICHESS_DB)
+    parser.add_argument('--model')
     parser.add_argument('--stockfish-exe', default=shutil.which('stockfish'))
     args = parser.parse_args()
 

@@ -12,7 +12,7 @@ import config as cfg
 
 
 class chessMainWindow(QMainWindow):
-    def __init__(self, lichess_db, stockfish_exe):
+    def __init__(self, lichess_db, engine):
         super().__init__()
 
         self.title = 'Chess Viewer and Player'
@@ -23,18 +23,18 @@ class chessMainWindow(QMainWindow):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
-        self.tab_widget = chessTabs(self, lichess_db, stockfish_exe)
+        self.tab_widget = chessTabs(self, lichess_db, engine)
         self.setCentralWidget(self.tab_widget)
 
         self.show()
 
 
 class chessTabs(QWidget):
-    def __init__(self, parent, lichess_db, stockfish_exe):
+    def __init__(self, parent, lichess_db, engine):
         super(QWidget, self).__init__(parent)
 
         self.lichess_db = lichess_db
-        self.stockfish_exe = stockfish_exe
+        self.engine = engine
 
         self.layout = QGridLayout(self)
 
@@ -209,9 +209,6 @@ class chessTabs(QWidget):
     def _initialize_player_tab(self):
         self.player_tab.layout = QGridLayout(self)
         self.player_tab.setLayout(self.player_tab.layout)
-
-        # initialize and load engine
-        self.engine = chess.engine.SimpleEngine.popen_uci(self.stockfish_exe)
 
         # SVG display for board
         self.player_SVG_widget = QSvgWidget(parent=self)

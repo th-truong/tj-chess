@@ -5,7 +5,8 @@ import torch
 
 def load_tj_model(weights_path):
     model = create_tj_model()
-    checkpoint = torch.load(weights_path)
+    # TODO: don't just load this on cpu!!
+    checkpoint = torch.load(weights_path, map_location=torch.device('cpu'))
 
     model.load_state_dict(checkpoint['model'])
 
