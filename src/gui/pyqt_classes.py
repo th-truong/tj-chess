@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import (QWidget, QGridLayout, QVBoxLayout, QPushButton,
                              QListWidget, QPlainTextEdit, QMainWindow, QTabWidget,
                              QCheckBox)
 from PyQt5.QtSvg import QSvgWidget
+from PyQt5.QtGui import QWheelEvent
 from pathlib import Path
 
 import config as cfg
@@ -116,6 +117,12 @@ class chessTabs(QWidget):
 
                 self.viewer_move_counter += 1
 
+    def viewer_wheel_event(self, event: QWheelEvent):
+        if event.angleDelta().y() > 0:
+            self.viewer_fwd_btn_click()
+        elif event.angleDelta().y() < 0:
+            self.viewer_back_btn_click()
+
     def viewer_paint_board(self):
         self.viewer_board_SVG = chess.svg.board(self.viewer_board).encode('UTF-8')
         self.viewer_SVG_widget.load(self.viewer_board_SVG)
@@ -192,6 +199,12 @@ class chessTabs(QWidget):
             self.player_board.push(result.move)
             self.player_paint_board()
             self.player_move_counter += 1
+
+    def player_wheel_event(self, event: QWheelEvent):
+        if event.angleDelta().y() > 0:
+            self.player_fwd_btn_click()
+        elif event.angleDelta().y() < 0:
+            self.player_back_btn_click()
 
     def _initialize_player_tab(self):
         self.player_tab.layout = QGridLayout(self)
