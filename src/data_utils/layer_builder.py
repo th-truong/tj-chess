@@ -24,11 +24,11 @@ class Meta(object):
         self.next_move = next_move
 
 
-def board_to_layers(board, meta):
+def board_to_layers(board, turn):
     if board is None:
         return [np.zeros(SIZE) for _ in range(len(chess.COLORS) * len(chess.PIECE_TYPES) + REPETITIONS)]
 
-    if meta.turn == chess.WHITE:
+    if turn == chess.WHITE:
         colors = [chess.WHITE, chess.BLACK]
     else:
         colors = [chess.BLACK, chess.WHITE]
@@ -50,6 +50,21 @@ def board_to_layers(board, meta):
     return board_layers
 
 
+def board_to_all_layers(board):
+    turn = board.turn
+    all_board_layers = []
+    for _ in range(HISTORY):
+        board_layers = board_to_layers(board, turn)
+        all_board_layers.extend(board_layers)
+        try:
+            if board is not None:
+                board.pop()
+        except IndexError:
+            board = None
+    layers = np.array(all_board_layers)
+    return layers
+
+
 def game_to_layers(game):
     game_node = game
     while True:
@@ -63,18 +78,7 @@ def game_to_layers(game):
             game.headers['Result'],
             next_game_node.move,
         )
-
-        all_board_layers = []
-        for _ in range(HISTORY):
-            board_layers = board_to_layers(board, meta)
-            all_board_layers.extend(board_layers)
-            try:
-                if board is not None:
-                    board.pop()
-            except IndexError:
-                board = None
-
-        layers = np.array(all_board_layers)
+        layers = board_to_all_layers(board)
         meta_layers = MetaLayers(meta, layers)
         yield meta_layers
 
