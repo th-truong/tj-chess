@@ -10,7 +10,7 @@ import chess.pgn
 import config as cfg
 
 from gui import pyqt_classes
-from network_utils.model_modules import create_vrb_model
+from network_utils.model_modules import create_tj_model
 from network_utils import network_out_interpreter as noi
 from data_utils import pt_loader
 
@@ -27,7 +27,7 @@ def train_first_tj_model(args):
     writer = SummaryWriter(log_dir=args.log_dir)
 
     # create model
-    model = create_vrb_model()
+    model = create_tj_model()
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     model.to(device)
     model.train()

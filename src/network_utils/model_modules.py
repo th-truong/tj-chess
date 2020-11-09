@@ -5,8 +5,7 @@ import config as cfg
 import numpy as np
 
 
-def create_vrb_model():
-
+def create_tj_model():
     input_module = TJInputModule()
     policy_head = PolicyHead()
     value_head = ValueHead()
@@ -168,7 +167,7 @@ class PolicyHead(torch.nn.Module):
 
 
 if __name__ == '__main__':
-    model = create_vrb_model()
+    model = create_tj_model()
     dummy = torch.rand(2,112,8,8)
 
     policy, value, targets = model(dummy, targets=1)
