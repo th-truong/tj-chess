@@ -6,6 +6,7 @@ import numpy as np
 
 
 def create_tj_model():
+    # TODO: modify this function to create a model given a config object that contains the model hyperparameters
     input_module = TJInputModule()
     policy_head = PolicyHead()
     value_head = ValueHead()
