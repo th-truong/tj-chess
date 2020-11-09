@@ -51,6 +51,9 @@ def board_to_layers(board, turn):
 
 
 def board_to_all_layers(board):
+    """
+    WARNING!! this kills the board's move stack. please pass in a copy
+    """
     turn = board.turn
     all_board_layers = []
     for _ in range(HISTORY):
