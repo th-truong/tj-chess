@@ -43,7 +43,7 @@ def board_to_layers(board, turn):
             board_layers.append(layer)
 
     for i in range(REPETITIONS):
-        if board.is_repetition(i + 1):
+        if board.is_repetition(i + 2):
             board_layers.append(np.ones(SIZE))
         else:
             board_layers.append(np.zeros(SIZE))
@@ -106,8 +106,8 @@ if __name__ == '__main__':
                 print('turn: %s' % i)
                 print('color: %s' % ('white' if meta_layers.meta.turn == chess.WHITE else 'black'))
                 print('next move: %s' % (meta_layers.meta.next_move))
-                print(meta_layers.layers[0])
-                print(meta_layers.layers[6])
+                print(meta_layers.layers)
+                # print(meta_layers.layers[6])
                 print(meta_layers.layers.shape)
                 if i == 2:
                     break
