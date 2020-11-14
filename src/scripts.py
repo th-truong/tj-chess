@@ -60,7 +60,7 @@ def display_gui(args):
         model.eval()
         engine = TjEngine(model)
     else:
-        engine = chess.engine.SimpleEngine.popen_uci(self.stockfish_exe)
+        engine = chess.engine.SimpleEngine.popen_uci(args.stockfish_exe)
 
     ex = pyqt_classes.chessMainWindow(args.lichess_db, engine)
     ex.show()
