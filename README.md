@@ -1,5 +1,7 @@
 # tj-chess
 
+![Python application](https://github.com/th-truong/tj-chess/workflows/Python%20application/badge.svg)
+
 ## setup
 
 ```bash
