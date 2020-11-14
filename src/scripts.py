@@ -30,6 +30,7 @@ class TjEngine(object):
         layers = board_to_all_layers(board.copy())
         input_tensor = torch.from_numpy(layers.astype(np.float32)).unsqueeze(dim=0)
         policy, value, _targets = self.model(input_tensor)
+        print(value)
 
         interpreter = noi.NetInterpreter()
         interpreter.set_colour_to_play('white' if board.turn == chess.WHITE else 'black')
@@ -37,8 +38,6 @@ class TjEngine(object):
         mask = torch.zeros_like(policy)
         for legal_move in board.legal_moves:
             move_indicies = interpreter.interpret_UCI_move(legal_move.uci())
-            print(move_indicies)
-            print(mask.shape)
             mask[0, move_indicies[2], move_indicies[0], move_indicies[1]] = 1
 
         masked_policy = policy * mask
@@ -159,3 +158,33 @@ def python_chess_ex():
         board
 
     board
+
+
+def quick_bot_test():
+    from network_utils.load_tj_model import load_tj_model
+    import chess
+    from network_utils import network_out_interpreter as noi
+    from data_utils import layer_builder
+    import numpy as np
+
+    model = load_tj_model(r"D:\paper_repos\tj-chess\CE_loss_model_tensorboard\25001_steps.tar")
+    model.eval()
+
+    board = chess.Board()
+    print(board)
+    print('')
+    while True:
+        meta = layer_builder.Meta(
+            board.turn,
+            None,
+            None
+        )
+        input_tensor = np.array(layer_builder.board_to_layers(board, meta))
+
+        input_tensor = torch.from_numpy(input_tensor.astype(np.float32))
+
+        # out = model(input_tensor)
+        # indices = torch.argmax(out, keepdim=True)
+
+        print(input_tensor.shape)
+        break

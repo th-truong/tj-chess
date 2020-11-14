@@ -1,16 +1,15 @@
 """[summary]https://lczero.org/dev/backend/nn/#network-topology
 """
 import torch
-import config as cfg
 import numpy as np
 
 
-def create_tj_model():
+def create_tj_model(cfg):
     # TODO: modify this function to create a model given a config object that contains the model hyperparameters
-    input_module = TJInputModule()
-    policy_head = PolicyHead()
-    value_head = ValueHead()
-    body = TJSEBlockBody()
+    input_module = TJInputModule(cfg)
+    policy_head = PolicyHead(cfg)
+    value_head = ValueHead(cfg)
+    body = TJSEBlockBody(cfg)
     model = TJChessModel(input_module=input_module,
                          body=body,
                          policy_head=policy_head,
@@ -44,9 +43,11 @@ class TJChessModel(torch.nn.Module):
 
 class TJInputModule(torch.nn.Module):
 
-    def __init__(self, input_size=cfg.INPUT_SIZE, input_filters=cfg.FILTERS):
+    def __init__(self, cfg):
         super(TJInputModule, self).__init__()
-        self.input_conv2d = torch.nn.Conv2d(input_size[0], input_filters,
+        self.input_size = cfg.INPUT_SIZE
+        self.input_filters = cfg.FILTERS
+        self.input_conv2d = torch.nn.Conv2d(self.input_size[0], self.input_filters,
                                             kernel_size=3, padding=1, stride=1)
 
     def forward(self, input_board):
@@ -56,13 +57,13 @@ class TJInputModule(torch.nn.Module):
 
 class TJSEBlockBody(torch.nn.Module):
 
-    def __init__(self, num_blocks=cfg.SE_BLOCKS, num_filters=cfg.FILTERS, num_se_channels=cfg.SE_CHANNELS):
+    def __init__(self, cfg):
         super(TJSEBlockBody, self).__init__()
-        self.num_blocks = num_blocks
-        self.num_filters = num_filters
-        self.num_se_channels = num_se_channels
+        self.num_blocks = cfg.SE_BLOCKS
+        self.num_filters = cfg.FILTERS
+        self.num_se_channels = cfg.SE_CHANNELS
 
-        self.se_blocks = torch.nn.ModuleList([SEBlock(num_filters=self.num_filters, num_se_channels=self.num_se_channels)
+        self.se_blocks = torch.nn.ModuleList([SEBlock(cfg)
                                              for i in range(0, self.num_blocks)])
         self.sequential_se_blocks = torch.nn.Sequential(*self.se_blocks)
 
@@ -73,10 +74,10 @@ class TJSEBlockBody(torch.nn.Module):
 
 class SEBlock(torch.nn.Module):
 
-    def __init__(self, num_filters=cfg.FILTERS, num_se_channels=cfg.SE_CHANNELS):
+    def __init__(self, cfg):
         super(SEBlock, self).__init__()
-        self.num_filters = num_filters
-        self.num_se_channels = num_se_channels
+        self.num_filters = cfg.FILTERS
+        self.num_se_channels = cfg.SE_CHANNELS
 
         self.conv2d_0 = torch.nn.Conv2d(self.num_filters, self.num_filters,
                                         kernel_size=3, padding=1, stride=1)
@@ -88,10 +89,10 @@ class SEBlock(torch.nn.Module):
 
         self.flatten = torch.nn.Flatten()
 
-        self.fc0 = torch.nn.Linear(num_filters, num_se_channels)
+        self.fc0 = torch.nn.Linear(self.num_filters, self.num_se_channels)
         self.relu0 = torch.nn.ReLU(inplace=True)
 
-        self.fc1 = torch.nn.Linear(num_se_channels, num_filters * 2)
+        self.fc1 = torch.nn.Linear(self.num_se_channels, self.num_filters * 2)
 
         self.sigmoid = torch.nn.Sigmoid()
 
@@ -121,9 +122,9 @@ class SEBlock(torch.nn.Module):
 
 class ValueHead(torch.nn.Module):
 
-    def __init__(self, num_filters=cfg.FILTERS):
+    def __init__(self, cfg):
         super(ValueHead, self).__init__()
-        self.num_filters = num_filters
+        self.num_filters = cfg.FILTERS
 
         self.conv2d_0 = torch.nn.Conv2d(self.num_filters, 32,
                                         kernel_size=3, padding=1, stride=1)
@@ -152,9 +153,9 @@ class ValueHead(torch.nn.Module):
 
 class PolicyHead(torch.nn.Module):
 
-    def __init__(self, num_filters=cfg.FILTERS):
+    def __init__(self, cfg):
         super(PolicyHead, self).__init__()
-        self.num_filters = num_filters
+        self.num_filters = cfg.FILTERS
 
         self.conv2d_0 = torch.nn.Conv2d(self.num_filters, self.num_filters,
                                         kernel_size=3, padding=1, stride=1)
