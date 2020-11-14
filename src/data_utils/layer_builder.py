@@ -43,7 +43,7 @@ def board_to_layers(board, turn):
             board_layers.append(layer)
 
     for i in range(REPETITIONS):
-        if board.is_repetition(i+1):
+        if board.is_repetition(i + 1):
             board_layers.append(np.ones(SIZE))
         else:
             board_layers.append(np.zeros(SIZE))

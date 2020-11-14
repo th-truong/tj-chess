@@ -126,7 +126,7 @@ class ValueHead(torch.nn.Module):
         self.num_filters = num_filters
 
         self.conv2d_0 = torch.nn.Conv2d(self.num_filters, 32,
-                                kernel_size=3, padding=1, stride=1)
+                                        kernel_size=3, padding=1, stride=1)
         self.conv2d_1 = torch.nn.Conv2d(32, 128,
                                         kernel_size=8, padding=0, stride=1)
         self.relu1 = torch.nn.ReLU(inplace=True)
@@ -169,7 +169,7 @@ class PolicyHead(torch.nn.Module):
 
 if __name__ == '__main__':
     model = create_tj_model()
-    dummy = torch.rand(2,112,8,8)
+    dummy = torch.rand(2, 112, 8, 8)
 
     policy, value, targets = model(dummy, targets=1)
 

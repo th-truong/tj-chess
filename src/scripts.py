@@ -113,7 +113,7 @@ def train_first_tj_model(args):
 
         target_policies = []
         for i, next_move in enumerate(targets['next_move']):
-            target_policy = torch.zeros(73,8,8)
+            target_policy = torch.zeros(73, 8, 8)
             target_policy[int(next_move[2]), int(next_move[0]), int(next_move[1])] = 1
             target_policies.append(target_policy)
         target_policies = torch.stack(target_policies)
@@ -134,15 +134,13 @@ def train_first_tj_model(args):
         scheduler.step(total_loss)  # must call this after the optimizer step
 
         if current_step % 5000 == 0:
-            torch.save({
-            'model': model.state_dict(),
-            'optimizer': optimizer.state_dict(),
-            "global_step": current_step
-            }, str(current_step) + "_steps.tar")
+            torch.save({'model': model.state_dict(),
+                        'optimizer': optimizer.state_dict(),
+                        "global_step": current_step},
+                       str(current_step) + "_steps.tar")
 
         if current_step == num_steps:
             break
-
 
 
 def python_chess_ex():

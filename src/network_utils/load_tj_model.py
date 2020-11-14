@@ -3,6 +3,7 @@
 from network_utils.model_modules import create_tj_model
 import torch
 
+
 def load_tj_model(weights_path):
     model = create_tj_model()
     # TODO: don't just load this on cpu!!
