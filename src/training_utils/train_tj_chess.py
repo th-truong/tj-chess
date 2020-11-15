@@ -80,7 +80,7 @@ def train_tj_chess(args):
         total_loss = 0.99 * policy_loss + 0.01 * value_loss
 
         writer.add_scalar('loss/train', total_loss, current_step)
-        writer.add_scalar('lr', scheduler.get_last_lr(), current_step)
+        writer.add_scalar('lr', np.max([param_group['lr'] for param_group in optimizer.param_groups]), current_step)
 
         optimizer.zero_grad()
         total_loss.backward()
