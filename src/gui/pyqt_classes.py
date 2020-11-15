@@ -122,7 +122,7 @@ class chessTabs(QWidget):
         self.viewer_SVG_widget.load(self.viewer_board_SVG)
 
     def _initialize_viewer_tab(self):
-        self.viewer_tab.layout = QGridLayout(self)
+        self.viewer_tab.layout = QGridLayout(self.viewer_tab)
 
         self.viewer_tab.setLayout(self.viewer_tab.layout)
         self.viewer_current_game = None
@@ -207,7 +207,7 @@ class chessTabs(QWidget):
                 self.player_back_btn_click()
 
     def _initialize_player_tab(self):
-        self.player_tab.layout = QGridLayout(self)
+        self.player_tab.layout = QGridLayout(self.player_tab)
         self.player_tab.setLayout(self.player_tab.layout)
 
         # SVG display for board
