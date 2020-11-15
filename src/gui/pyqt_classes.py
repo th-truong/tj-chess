@@ -9,11 +9,18 @@ from PyQt5.QtGui import QWheelEvent
 from pathlib import Path
 
 import config as cfg
+from network_utils.engine import TjEngine
 
 
 class chessMainWindow(QMainWindow):
-    def __init__(self, lichess_db, engine):
+    def __init__(self, lichess_db, stockfish=None, model=None):
         super().__init__()
+
+        self.engines = []
+        if model is not None:
+            self.engines.append(TjEngine.load(model))
+        if stockfish is not None:
+            self.engines.append(chess.engine.SimpleEngine.popen_uci(stockfish))
 
         self.title = 'Chess Viewer and Player'
         self.left = 0
@@ -23,19 +30,21 @@ class chessMainWindow(QMainWindow):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
-        self.tab_widget = chessTabs(self, lichess_db, engine)
+        self.tab_widget = chessTabs(self, lichess_db, self.engines)
         self.setCentralWidget(self.tab_widget)
-
-        self.show()
+    
+    def closeEvent(self, event):
+        for engine in self.engines:
+            engine.close()
 
 
 class chessTabs(QWidget):
-    def __init__(self, parent, lichess_db, engine):
+    def __init__(self, parent, lichess_db, engines):
         super(QWidget, self).__init__(parent)
 
         self.tabs = QTabWidget()
         viewer_tab = ViewerTab(self, lichess_db)
-        player_tab = PlayerTab(self, engine)
+        player_tab = PlayerTab(self, engines)
 
         self.tabs.addTab(viewer_tab, "Viewer")
         self.tabs.addTab(player_tab, "Player")
@@ -53,10 +62,11 @@ class chessTabs(QWidget):
 
 
 class PlayerTab(QWidget):
-    def __init__(self, parent, engine):
+    def __init__(self, parent, engines):
         super(QWidget, self).__init__(parent)
 
-        self.engine = engine
+        self.engines = engines
+        self.current_engine = None
 
         layout = QGridLayout(self)
 
@@ -90,9 +100,16 @@ class PlayerTab(QWidget):
         self.push_move_btn.clicked.connect(self.move_push)
         layout.addWidget(self.push_move_btn, 0, 7, 1, 1)
 
+        # listbox for games in current pgn
+        self.engine_list = QListWidget()
+        self.engine_list.clicked.connect(self.engine_list_click)
+        layout.addWidget(self.engine_list, 0, 8, 4, 7)
+        for i, engine in enumerate(engines):
+            self.engine_list.insertItem(i, engine.id['name'])
+
         # textbox displaying current game moves
         self.current_game_moves_txt = QPlainTextEdit(self)
-        layout.addWidget(self.current_game_moves_txt, 0, 8, 10, 7)
+        layout.addWidget(self.current_game_moves_txt, 4, 8, 6, 7)
 
         self.setLayout(layout)
 
@@ -121,11 +138,17 @@ class PlayerTab(QWidget):
             self.move_counter -= 1
 
     def fwd_btn_click(self):
-        result = self.engine.play(self.board, chess.engine.Limit(time=0.1))
+        if self.current_engine is None:
+            return
+        result = self.current_engine.play(self.board, chess.engine.Limit(time=0.1))
         if result.move is not None:
             self.board.push(result.move)
             self.paint_board()
             self.move_counter += 1
+
+    def engine_list_click(self, qmodelindex):
+        # set game as current selected game from list and display it
+        self.current_engine = self.engines[self.engine_list.currentRow()]
 
 
 class ViewerTab(QWidget):
