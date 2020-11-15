@@ -24,18 +24,18 @@ HISTORY = 8
 SIZE = (8, 8)
 
 # ********** Training Parameters ********** #
-LEARNING_RATE = 0.004
+LEARNING_RATE = 0.001
 BATCH_SIZE = 512
 LOADER_WORKERS = 8
 MAX_ITERATIONS = 500000
-WARM_UP_STEPS = 5000
+WARM_UP_STEPS = 20000
 SCHEDULER_PATIENCE = 10
 SCHEDULER_FACTOR = 0.5
-SAVE_FREQ = 1000
+SAVE_FREQ = 2000
 
 OPTIMIZER = torch.optim.Adam
 POLICY_LOSS = torch.nn.CrossEntropyLoss
 VALUE_LOSS = torch.nn.CrossEntropyLoss
-SCHEDULER = torch.optim.lr_scheduler.ReduceLROnPlateau
+SCHEDULER = None
 
 LOG_DIR = Path(r"D:\paper_repos\tj-chess\CE_loss_model_tensorboard")

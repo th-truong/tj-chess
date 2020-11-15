@@ -13,7 +13,6 @@ from data_utils import pt_loader
 
 
 def train_tj_chess(args):
-    # TODO: add support for continuing training
     # TODO: add support for displaying games on tensorboard as validation
     spec = importlib.util.spec_from_file_location("", args.training_cfg_dir)
     cfg = importlib.util.module_from_spec(spec)
@@ -22,12 +21,19 @@ def train_tj_chess(args):
     # start tensorboard logging
     writer = SummaryWriter(log_dir=args.log_dir)
     model_save_dir = Path(args.log_dir) / "models"
-    if not model_save_dir.exists():
+    if model_save_dir.exists():
+        last_model_path = list(model_save_dir.glob("*.tar"))[-1]
+        continue_training_flag = True  # used to configure training to continue or to start fresh
+    else:
         model_save_dir.mkdir(parents=True)
+        continue_training_flag = False
 
     # create model
-    model = load_tj_model(cfg)
-    print(model)
+    if continue_training_flag:
+        model, checkpoint = load_tj_model(cfg, weights_path=str(last_model_path), training=True)
+    else:
+        model = load_tj_model(cfg)
+
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     model.to(device)
     model.train()
@@ -42,25 +48,45 @@ def train_tj_chess(args):
 
     # configure training parameters
     learning_rate = cfg.LEARNING_RATE
-    optimizer = cfg.OPTIMIZER(model.parameters(), lr=learning_rate)
+    if continue_training_flag:
+        optimizer = cfg.OPTIMIZER(model.parameters(), lr=learning_rate)
+        optimizer.load_state_dict(checkpoint['optimizer'])
+    else:
+        optimizer = cfg.OPTIMIZER(model.parameters(), lr=learning_rate)
 
     loss_fn_policy = cfg.POLICY_LOSS()
     loss_fn_value = cfg.VALUE_LOSS()
 
     num_steps = cfg.MAX_ITERATIONS
 
-    for current_step, out in tqdm(enumerate(pt_dataloader)):
-        if current_step == 0:
-            # set the learning rate very low for warm up
-            for param_group in optimizer.param_groups:
-                param_group['lr'] = learning_rate / 1000
-            scheduler = cfg.SCHEDULER(optimizer, 'min', patience=cfg.SCHEDULER_PATIENCE,
-                                      factor=cfg.SCHEDULER_FACTOR)
-        elif current_step == cfg.WARM_UP_STEPS:
-            for param_group in optimizer.param_groups:
-                param_group['lr'] = learning_rate
-            scheduler = cfg.SCHEDULER(optimizer, 'min', patience=cfg.SCHEDULER_PATIENCE,
-                                      factor=cfg.SCHEDULER_FACTOR)
+    if continue_training_flag:
+        current_step = checkpoint['global_step']
+    else:
+        current_step = 0
+
+    # TODO: clean up this training loop, probably put it into a separate function
+    for out in tqdm(pt_dataloader):
+        if continue_training_flag:
+            if current_step == cfg.WARM_UP_STEPS:
+                for param_group in optimizer.param_groups:
+                    param_group['lr'] = param_group['lr'] * 1000
+                if cfg.SCHEDULER is not None:
+                    scheduler = cfg.SCHEDULER(optimizer, 'min', patience=cfg.SCHEDULER_PATIENCE,
+                                              factor=cfg.SCHEDULER_FACTOR)
+        else:
+            if current_step == 0:
+                # set the learning rate very low for warm up
+                for param_group in optimizer.param_groups:
+                    param_group['lr'] = learning_rate / 1000
+                if cfg.SCHEDULER is not None:
+                    scheduler = cfg.SCHEDULER(optimizer, 'min', patience=cfg.SCHEDULER_PATIENCE,
+                                              factor=cfg.SCHEDULER_FACTOR)
+            elif current_step == cfg.WARM_UP_STEPS:
+                for param_group in optimizer.param_groups:
+                    param_group['lr'] = param_group['lr'] * 1000
+                if cfg.SCHEDULER is not None:
+                    scheduler = cfg.SCHEDULER(optimizer, 'min', patience=cfg.SCHEDULER_PATIENCE,
+                                              factor=cfg.SCHEDULER_FACTOR)
         moves = out[0].to(device)
         targets = {k: v.to(device) for k, v in out[1].items()}
 
@@ -86,7 +112,8 @@ def train_tj_chess(args):
         optimizer.zero_grad()
         total_loss.backward()
         optimizer.step()
-        scheduler.step(total_loss)  # must call this after the optimizer step
+        if cfg.SCHEDULER is not None:
+            scheduler.step(total_loss)  # must call this after the optimizer step
 
         if current_step % cfg.SAVE_FREQ == 0:
             torch.save({'model': model.state_dict(),
@@ -96,3 +123,5 @@ def train_tj_chess(args):
 
         if current_step == num_steps:
             break
+
+        current_step += 1

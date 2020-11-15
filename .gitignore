@@ -5,6 +5,6 @@ venv/
 stockfish*
 
 lichess_elite_db/
-Lichess Elite Database/
+*Database/
 data/
 *_tensorboard/
