@@ -49,9 +49,11 @@ class TJInputModule(torch.nn.Module):
         self.input_filters = cfg.FILTERS
         self.input_conv2d = torch.nn.Conv2d(self.input_size[0], self.input_filters,
                                             kernel_size=3, padding=1, stride=1)
+        self.bn_0 = torch.nn.BatchNorm2d(self.input_filters)
 
     def forward(self, input_board):
         molded_input = self.input_conv2d(input_board)
+        molded_input = self.bn_0(molded_input)
         return molded_input
 
 
@@ -84,6 +86,9 @@ class SEBlock(torch.nn.Module):
         self.conv2d_1 = torch.nn.Conv2d(self.num_filters, self.num_filters,
                                         kernel_size=3, padding=1, stride=1)
 
+        self.bn_0 = torch.nn.BatchNorm2d(self.num_filters)
+        self.bn_1 = torch.nn.BatchNorm2d(self.num_filters)
+
         # used to reduce the [batch_size, channels, 8, 8] to [batch_size, channels, 1, 1]
         self.avg_pool = torch.nn.AvgPool2d(8)
 
@@ -100,9 +105,11 @@ class SEBlock(torch.nn.Module):
 
     def forward(self, input_tensor):
         conv2d_0_out = self.conv2d_0(input_tensor)
-        conv2d_1_out = self.conv2d_1(conv2d_0_out)
+        bn_0_out = self.bn_0(conv2d_0_out)
+        conv2d_1_out = self.conv2d_1(bn_0_out)
+        bn_1_out = self.bn_1(conv2d_1_out)
 
-        avg_out = self.avg_pool(conv2d_1_out)
+        avg_out = self.avg_pool(bn_1_out)
         flatten_out = self.flatten(avg_out)
         fc0_out = self.fc0(flatten_out)
         relu0_out = self.relu0(fc0_out)
@@ -128,16 +135,20 @@ class ValueHead(torch.nn.Module):
 
         self.conv2d_0 = torch.nn.Conv2d(self.num_filters, 32,
                                         kernel_size=3, padding=1, stride=1)
+        self.bn_0 = torch.nn.BatchNorm2d(32)
         self.conv2d_1 = torch.nn.Conv2d(32, 128,
                                         kernel_size=8, padding=0, stride=1)
+        self.bn_1 = torch.nn.BatchNorm2d(128)
         self.relu1 = torch.nn.ReLU(inplace=True)
         self.fc0 = torch.nn.Linear(128, 3)
         self.sm0 = torch.nn.Softmax(1)
 
     def forward(self, input_tensor):
         conv2d_0_out = self.conv2d_0(input_tensor)
-        conv2d_1_out = self.conv2d_1(conv2d_0_out)
-        relu1_out = self.relu1(conv2d_1_out).squeeze(2).squeeze(2)
+        bn_0_out = self.bn_0(conv2d_0_out)
+        conv2d_1_out = self.conv2d_1(bn_0_out)
+        bn_1_out = self.bn_1(conv2d_1_out)
+        relu1_out = self.relu1(bn_1_out).squeeze(2).squeeze(2)
 
         fc0_out = self.fc0(relu1_out)
 
@@ -159,11 +170,13 @@ class PolicyHead(torch.nn.Module):
 
         self.conv2d_0 = torch.nn.Conv2d(self.num_filters, self.num_filters,
                                         kernel_size=3, padding=1, stride=1)
+        self.bn_0 = torch.nn.BatchNorm2d(self.num_filters)
         self.conv2d_1 = torch.nn.Conv2d(self.num_filters, 73,
                                         kernel_size=3, padding=1, stride=1)
 
     def forward(self, input_tensor):
         conv2d_0_out = self.conv2d_0(input_tensor)
+        bn_0_out = self.bn_0(conv2d_0_out)
         policy_head_out = self.conv2d_1(conv2d_0_out)
         return policy_head_out
 
