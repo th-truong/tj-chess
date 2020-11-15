@@ -69,7 +69,7 @@ def train_tj_chess(args):
         if continue_training_flag:
             if current_step == cfg.WARM_UP_STEPS:
                 for param_group in optimizer.param_groups:
-                    param_group['lr'] = param_group['lr'] * 1000
+                    param_group['lr'] = param_group['lr'] * 100
                 if cfg.SCHEDULER is not None:
                     scheduler = cfg.SCHEDULER(optimizer, 'min', patience=cfg.SCHEDULER_PATIENCE,
                                               factor=cfg.SCHEDULER_FACTOR)
@@ -77,13 +77,13 @@ def train_tj_chess(args):
             if current_step == 0:
                 # set the learning rate very low for warm up
                 for param_group in optimizer.param_groups:
-                    param_group['lr'] = learning_rate / 1000
+                    param_group['lr'] = learning_rate / 100
                 if cfg.SCHEDULER is not None:
                     scheduler = cfg.SCHEDULER(optimizer, 'min', patience=cfg.SCHEDULER_PATIENCE,
                                               factor=cfg.SCHEDULER_FACTOR)
             elif current_step == cfg.WARM_UP_STEPS:
                 for param_group in optimizer.param_groups:
-                    param_group['lr'] = param_group['lr'] * 1000
+                    param_group['lr'] = param_group['lr'] * 100
                 if cfg.SCHEDULER is not None:
                     scheduler = cfg.SCHEDULER(optimizer, 'min', patience=cfg.SCHEDULER_PATIENCE,
                                               factor=cfg.SCHEDULER_FACTOR)
@@ -119,7 +119,7 @@ def train_tj_chess(args):
             torch.save({'model': model.state_dict(),
                         'optimizer': optimizer.state_dict(),
                         "global_step": current_step},
-                       str(model_save_dir / (str(current_step) + "_steps.tar")))
+                       str(model_save_dir / (str(current_step).zfill(10) + ".tar")))
 
         if current_step == num_steps:
             break
