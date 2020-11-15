@@ -21,3 +21,5 @@ def load_tj_model(cfg, weights_path=None, training=False):
             return model, checkpoint
         else:
             return model
+    else:
+        return model
