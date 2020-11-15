@@ -32,7 +32,7 @@ def train_tj_chess(args):
     if continue_training_flag:
         model, checkpoint = load_tj_model(cfg, weights_path=str(last_model_path), training=True)
     else:
-        model = load_tj_model(cfg)
+        model = load_tj_model(cfg, training=True)
 
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     model.to(device)
@@ -125,3 +125,9 @@ def train_tj_chess(args):
             break
 
         current_step += 1
+
+        if (model_save_dir / 'pause.txt').exists():
+            model.to('cpu')
+            while (model_save_dir / 'pause.txt').exists():
+                pass
+            model.to(device)  # bring model back to gpu
