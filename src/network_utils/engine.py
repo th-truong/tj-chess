@@ -45,6 +45,7 @@ class TjEngine(object):
         pass
 
     @classmethod
-    def load(cls, model_path):
-        model = load_tj_model(model_path)
+    def load(cls, model_path, cfg):
+        model = load_tj_model(cfg=cfg, weights_path=model_path)
         model.eval()
+        return cls(model)

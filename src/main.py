@@ -24,6 +24,7 @@ if __name__ == "__main__":
     parser_gui.set_defaults(func=display_gui)
     parser_gui.add_argument('--lichess-db', default=cfg.LICHESS_DB)
     parser_gui.add_argument('--model')
+    parser_gui.add_argument('--training-cfg-dir')
     parser_gui.add_argument('--stockfish-exe', default=shutil.which('stockfish'))
 
     parser_train = subparsers.add_parser('train')

@@ -17,6 +17,7 @@ def load_tj_model(cfg, weights_path=None, training=False):
 
         model.load_state_dict(checkpoint['model'])
 
-        return model, checkpoint
-
-    return model
+        if training:
+            return model, checkpoint
+        else:
+            return model

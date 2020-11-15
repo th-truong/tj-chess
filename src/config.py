@@ -24,7 +24,7 @@ HISTORY = 8
 SIZE = (8, 8)
 
 # ********** Training Parameters ********** #
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.0001
 BATCH_SIZE = 512
 LOADER_WORKERS = 8
 MAX_ITERATIONS = 500000

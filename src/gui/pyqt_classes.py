@@ -13,12 +13,12 @@ from network_utils.engine import TjEngine
 
 
 class chessMainWindow(QMainWindow):
-    def __init__(self, lichess_db, stockfish=None, model=None):
+    def __init__(self, lichess_db, stockfish=None, model=None, cfg=None):
         super().__init__()
 
         self.engines = []
         if model is not None:
-            self.engines.append(TjEngine.load(model))
+            self.engines.append(TjEngine.load(model, cfg))
         if stockfish is not None:
             self.engines.append(chess.engine.SimpleEngine.popen_uci(stockfish))
 
@@ -32,7 +32,7 @@ class chessMainWindow(QMainWindow):
 
         self.tab_widget = chessTabs(self, lichess_db, self.engines)
         self.setCentralWidget(self.tab_widget)
-    
+
     def closeEvent(self, event):
         for engine in self.engines:
             engine.close()
