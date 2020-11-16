@@ -1,5 +1,4 @@
 import sys
-import importlib.util
 
 import torch
 import numpy as np
@@ -13,11 +12,12 @@ from gui import pyqt_classes
 def display_gui(args):
     app = QApplication(sys.argv)
 
-    spec = importlib.util.spec_from_file_location("", args.training_cfg_dir)
-    cfg = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(cfg)
-
-    window = pyqt_classes.chessMainWindow(args.lichess_db, stockfish=args.stockfish_exe, model=args.model, cfg=cfg)
+    window = pyqt_classes.chessMainWindow(
+        args.lichess_db,
+        stockfish=args.stockfish_exe,
+        model=args.model,
+        training_cfg_dir=args.training_cfg_dir
+    )
     window.show()
 
     sys.exit(app.exec_())

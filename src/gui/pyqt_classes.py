@@ -1,4 +1,6 @@
 import sys
+import importlib.util
+
 import chess
 from PyQt5.QtWidgets import (QWidget, QGridLayout, QVBoxLayout, QPushButton,
                              QLabel, QTextEdit, QLineEdit, QFileDialog, QApplication,
@@ -13,11 +15,15 @@ from network_utils.engine import TjEngine
 
 
 class chessMainWindow(QMainWindow):
-    def __init__(self, lichess_db, stockfish=None, model=None, cfg=None):
+    def __init__(self, lichess_db, stockfish=None, model=None, training_cfg_dir=None):
         super().__init__()
 
         self.engines = []
         if model is not None:
+            spec = importlib.util.spec_from_file_location("", training_cfg_dir)
+            cfg = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(cfg)
+
             self.engines.append(TjEngine.load(model, cfg))
         if stockfish is not None:
             self.engines.append(chess.engine.SimpleEngine.popen_uci(stockfish))
