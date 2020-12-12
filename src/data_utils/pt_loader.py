@@ -3,6 +3,7 @@
 import torch
 import numpy as np
 import chess
+from pathlib import Path
 
 from data_utils import layer_builder
 import config as cfg
@@ -12,6 +13,8 @@ from network_utils import network_out_interpreter as noi
 class MoveLoader(torch.utils.data.IterableDataset):
     def __init__(self, dataset_path):
         super(MoveLoader).__init__()
+        if isinstance(dataset_path, str):
+            dataset_path = Path(dataset_path)
         if not dataset_path.exists():
             raise ValueError(f"{str(dataset_path)} does not exist, please configure config.py to point to a valid path.")
 

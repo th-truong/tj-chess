@@ -53,9 +53,9 @@ class NetInterpreter():
         offsets = self.moves_list[move]
 
         if (column + offsets[1] < 0 or row + offsets[0] < 0 or column + offsets[1] > 7 or row + offsets[0] > 7):  # for out of bounds moves
-            move = "INVALID"
+            assert False, f'column:{column}, row: {row}, move:{move}, offsets:{offsets}, starting:{starting_position}, player_to_move:{self.colour}'
         elif 64 <= move <= 72 and self.rows[row] != self.rows[-2]:  # for illegal promotions
-            move = "INVALID"
+            assert False, f'column:{column}, row: {row}, move:{move}, offsets:{offsets}, starting:{starting_position}, player_to_move:{self.colour}'
         else:
             final_position = self.columns[column + offsets[1]] + self.rows[row + offsets[0]]
             if 64 <= move <= 66:  # these are the rook promotions

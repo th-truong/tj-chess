@@ -1,7 +1,6 @@
 """[summary]
 """
 from pathlib import Path
-import torch
 
 # ********** Library Paths and Chess Engine Paths ********** #
 
@@ -11,31 +10,4 @@ LICHESS_DB = Path(r"D:\paper_repos\tj-chess\Lichess Elite Database")
 
 STOCKFISH_ENGINE_PATH = Path(r"D:\paper_repos\tj-chess\stockfish_20090216_x64_bmi2.exe")
 
-# ********** Model Architecture Parameters ********** #
-
-SE_BLOCKS = 20  # number of Squeeze and Excitation layers
-SE_CHANNELS = 32
-FILTERS = 256
-
-INPUT_SIZE = [112, 8, 8]
-
-# input sizes
-HISTORY = 8
-SIZE = (8, 8)
-
-# ********** Training Parameters ********** #
-LEARNING_RATE = 0.0001
-BATCH_SIZE = 512
-LOADER_WORKERS = 8
-MAX_ITERATIONS = 500000
-WARM_UP_STEPS = 20000
-SCHEDULER_PATIENCE = 10
-SCHEDULER_FACTOR = 0.5
-SAVE_FREQ = 2000
-
-OPTIMIZER = torch.optim.Adam
-POLICY_LOSS = torch.nn.CrossEntropyLoss
-VALUE_LOSS = torch.nn.CrossEntropyLoss
-SCHEDULER = None
-
-LOG_DIR = Path(r"D:\paper_repos\tj-chess\CE_loss_model_tensorboard")
+LOG_DIR = Path(r"D:\paper_repos\tj-chess\pickling_test")
