@@ -152,12 +152,12 @@ class ValueHead(torch.nn.Module):
 
         fc0_out = self.fc0(relu1_out)
 
-        if self.training:
-            # for training we do no use the softmax because torch.nn.CrossEntropyLoss applies a log-softmax
-            # TODO: add this as a layer into the network later and just return losses when self.training is true
-            value_head_out = fc0_out
-        else:
-            value_head_out = self.sm0(fc0_out)
+        # if self.training:
+        #     # for training we do no use the softmax because torch.nn.CrossEntropyLoss applies a log-softmax
+        #     # TODO: add this as a layer into the network later and just return losses when self.training is true
+        #     value_head_out = fc0_out
+        # else:
+        value_head_out = self.sm0(fc0_out)
 
         return value_head_out
 

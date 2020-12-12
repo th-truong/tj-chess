@@ -103,7 +103,7 @@ def train_tj_chess(args):
         pred_policies = torch.flatten(pred_policies, start_dim=1, end_dim=-1)
 
         policy_loss = loss_fn_policy(pred_policies, target_policies_labels.to(device))
-        value_loss = loss_fn_value(pred_values, torch.argmax(targets['result'], dim=1))
+        value_loss = loss_fn_value(pred_values, targets['result'])
         total_loss = 0.99 * policy_loss + 0.01 * value_loss
 
         writer.add_scalar('loss/train', total_loss, current_step)
