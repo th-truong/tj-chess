@@ -20,11 +20,7 @@ class chessMainWindow(QMainWindow):
 
         self.engines = []
         if model is not None:
-            spec = importlib.util.spec_from_file_location("", training_cfg_dir)
-            cfg = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(cfg)
-
-            self.engines.append(TjEngine.load(model, cfg))
+            self.engines.append(TjEngine.load(model))
         if stockfish is not None:
             self.engines.append(chess.engine.SimpleEngine.popen_uci(stockfish))
 

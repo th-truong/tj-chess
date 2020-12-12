@@ -35,7 +35,6 @@ def train_tj_chess(args):
         model_save_dir.mkdir(parents=True)
         continue_training_flag = False
 
-
     # create model
     if continue_training_flag:
         model, checkpoint = load_tj_model(cfg, weights_path=str(last_model_path), training=True, training_config=training_config)
