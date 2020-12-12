@@ -39,6 +39,7 @@ def train_tj_chess(args):
     # create model
     if continue_training_flag:
         model, checkpoint = load_tj_model(cfg, weights_path=str(last_model_path), training=True, training_config=training_config)
+        cfg = checkpoint['cfg']
     else:
         model = load_tj_model(cfg, training=True)
 
