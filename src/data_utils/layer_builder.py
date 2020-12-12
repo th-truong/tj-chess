@@ -4,10 +4,10 @@ import os
 import numpy as np
 import chess.pgn
 
-from training_utils.training_config import TJTrainConfig
+from training_utils.training_config import tj_train_config
 
-HISTORY = TJTrainConfig().history
-SIZE = TJTrainConfig().size
+HISTORY = tj_train_config['history']
+SIZE = tj_train_config['size']
 REPETITIONS = 2
 
 

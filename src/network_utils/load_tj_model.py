@@ -14,7 +14,6 @@ def load_tj_model(cfg, weights_path=None, training=False, training_config=None):
     # TODO: return the global step as well
 
     if weights_path is not None:
-        sys.modules['training_config'] = training_config
         if training:
             checkpoint = torch.load(weights_path)
         else:

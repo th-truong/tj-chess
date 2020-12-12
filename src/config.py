@@ -10,4 +10,4 @@ LICHESS_DB = Path(r"D:\paper_repos\tj-chess\Lichess Elite Database")
 
 STOCKFISH_ENGINE_PATH = Path(r"D:\paper_repos\tj-chess\stockfish_20090216_x64_bmi2.exe")
 
-LOG_DIR = Path(r"D:\paper_repos\tj-chess\pickling_test")
+LOG_DIR = Path(r"D:\paper_repos\tj-chess\CCRL_10_127_model_tensorboard")

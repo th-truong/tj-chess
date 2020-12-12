@@ -21,8 +21,7 @@ def train_tj_chess(args):
     spec.loader.exec_module(training_config)
     sys.modules['training_config'] = training_config
 
-    cfg = training_config.TJTrainConfig()
-
+    cfg = training_config.tj_train_config
 
     # start tensorboard logging
     writer = SummaryWriter(log_dir=args.log_dir)
@@ -52,20 +51,20 @@ def train_tj_chess(args):
 
     # load dataset objects
     dataset = pt_loader.MoveLoader(args.lichess_db)
-    pt_dataloader = torch.utils.data.DataLoader(dataset, batch_size=cfg.batch_size,
-                                                num_workers=cfg.loader_workers, worker_init_fn=pt_loader.worker_init_fn)
+    pt_dataloader = torch.utils.data.DataLoader(dataset, batch_size=cfg['batch_size'],
+                                                num_workers=cfg['loader_workers'], worker_init_fn=pt_loader.worker_init_fn)
 
     # configure training parameters
     if continue_training_flag:
-        optimizer = cfg.optimizer(model.parameters(), **cfg.optimizer_kwargs)
+        optimizer = cfg['optimizer'](model.parameters(), **cfg['optimizer_kwargs'])
         optimizer.load_state_dict(checkpoint['optimizer'])
     else:
-        optimizer = cfg.optimizer(model.parameters(), **cfg.optimizer_kwargs)
+        optimizer = cfg['optimizer'](model.parameters(), **cfg['optimizer_kwargs'])
 
-    loss_fn_policy = cfg.policy_loss()
-    loss_fn_value = cfg.value_loss()
+    loss_fn_policy = cfg['policy_loss']()
+    loss_fn_value = cfg['value_loss']()
 
-    num_steps = cfg.max_iterations
+    num_steps = cfg['max_iterations']
 
     if continue_training_flag:
         current_step = checkpoint['global_step']
@@ -75,23 +74,23 @@ def train_tj_chess(args):
     # TODO: clean up this training loop, probably put it into a separate function
     for out in tqdm(pt_dataloader):
         if continue_training_flag:
-            if current_step == cfg.warm_up_steps:
+            if current_step == cfg['warm_up_steps']:
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = param_group['lr'] * 100
-                if cfg.scheduler is not None:
-                    scheduler = cfg.scheduler(optimizer, **cfg.scheduler_kwargs)
+                if cfg['scheduler'] is not None:
+                    scheduler = cfg['scheduler'](optimizer, **cfg['scheduler_kwargs'])
         else:
             if current_step == 0:
                 # set the learning rate very low for warm up
                 for param_group in optimizer.param_groups:
-                    param_group['lr'] = cfg.optimizer_kwargs['lr'] / 100
-                if cfg.scheduler is not None:
-                    scheduler = cfg.scheduler(optimizer, **cfg.scheduler_kwargs)
-            elif current_step == cfg.warm_up_steps:
+                    param_group['lr'] = cfg['optimizer_kwargs']['lr'] / 100
+                if cfg['scheduler'] is not None:
+                    scheduler = cfg['scheduler'](optimizer, **cfg['scheduler_kwargs'])
+            elif current_step == cfg['warm_up_steps']:
                 for param_group in optimizer.param_groups:
                     param_group['lr'] = param_group['lr'] * 100
-                if cfg.scheduler is not None:
-                    scheduler = cfg.scheduler(optimizer, **cfg.scheduler_kwargs)
+                if cfg['scheduler'] is not None:
+                    scheduler = cfg['scheduler'](optimizer, **cfg['scheduler_kwargs'])
         moves = out[0].to(device)
         targets = {k: v.to(device) for k, v in out[1].items()}
 
@@ -117,10 +116,10 @@ def train_tj_chess(args):
         optimizer.zero_grad()
         total_loss.backward()
         optimizer.step()
-        if cfg.scheduler is not None:
+        if cfg['scheduler'] is not None:
             scheduler.step(total_loss)  # must call this after the optimizer step
 
-        if current_step % cfg.save_freq == 0:
+        if current_step % cfg['save_freq'] == 0:
             torch.save({'model': model.state_dict(),
                         'optimizer': optimizer.state_dict(),
                         "global_step": current_step,

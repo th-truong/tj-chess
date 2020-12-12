@@ -21,7 +21,6 @@ class TjEngine(object):
         layers = board_to_all_layers(board.copy())
         input_tensor = torch.from_numpy(layers.astype(np.float32)).unsqueeze(dim=0)
         policy, value, _targets = self.model(input_tensor)
-        print(value)
 
         interpreter = noi.NetInterpreter()
         interpreter.set_colour_to_play('white' if board.turn == chess.WHITE else 'black')
@@ -36,6 +35,9 @@ class TjEngine(object):
         policy_indicies = np.unravel_index(torch.argmax(masked_policy), policy.shape)
 
         uci = interpreter.interpret_net_move(policy_indicies[2], policy_indicies[3], policy_indicies[1])
+        print(value)
+        print(uci)
+        # TODO: figure out why the interpreter doesn't mask out illegal moves properly when kings are on the corners of the board at the end
         move = chess.Move.from_uci(uci)
 
         result = chess.engine.PlayResult(move, None)

@@ -6,10 +6,10 @@ import numpy as np
 
 def create_tj_model(cfg):
     # TODO: modify this function to create a model given a config object that contains the model hyperparameters
-    input_module = cfg.input_module(**cfg.input_module_kwargs)
-    policy_head = cfg.policy_module(**cfg.policy_module_kwargs)
-    value_head = cfg.value_module(**cfg.value_module_kwargs)
-    body = cfg.body_module(**cfg.body_module_kwargs)
+    input_module = cfg['input_module'](**cfg['input_module_kwargs'])
+    policy_head = cfg['policy_module'](**cfg['policy_module_kwargs'])
+    value_head = cfg['value_module'](**cfg['value_module_kwargs'])
+    body = cfg['body_module'](**cfg['body_module_kwargs'])
     model = TJChessModel(input_module=input_module,
                          body=body,
                          policy_head=policy_head,
