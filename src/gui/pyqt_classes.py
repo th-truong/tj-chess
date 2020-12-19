@@ -140,13 +140,14 @@ class PlayerTab(QWidget):
             self.move_counter -= 1
 
     def fwd_btn_click(self):
-        if self.current_engine is None:
-            return
-        result = self.current_engine.play(self.board, chess.engine.Limit(time=0.1))
-        if result.move is not None:
-            self.board.push(result.move)
-            self.paint_board()
-            self.move_counter += 1
+        if not self.board.is_game_over():
+            if self.current_engine is None:
+                return
+            result = self.current_engine.play(self.board, chess.engine.Limit(time=0.1))
+            if result.move is not None:
+                self.board.push(result.move)
+                self.paint_board()
+                self.move_counter += 1
 
     def engine_list_click(self, qmodelindex):
         # set game as current selected game from list and display it

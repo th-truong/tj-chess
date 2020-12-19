@@ -37,8 +37,11 @@ class TjEngine(object):
         uci = interpreter.interpret_net_move(policy_indicies[2], policy_indicies[3], policy_indicies[1])
         print(value)
         print(uci)
-        # TODO: figure out why the interpreter doesn't mask out illegal moves properly when kings are on the corners of the board at the end
-        move = chess.Move.from_uci(uci)
+
+        if chess.Move.from_uci(uci) in board.legal_moves:  # this should be true for all cases because of the move mask, minus queen promotions
+            move = chess.Move.from_uci(uci)
+        else:  # is a queen promotion
+            move = chess.Move.from_uci(uci + "q")
 
         result = chess.engine.PlayResult(move, None)
         return result
