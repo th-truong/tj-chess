@@ -1,6 +1,7 @@
 """[summary]
 """
 import sys
+import time
 
 import importlib
 from torch.utils.tensorboard import SummaryWriter
@@ -134,5 +135,5 @@ def train_tj_chess(args):
         if (model_save_dir / 'pause.txt').exists():
             model.to('cpu')
             while (model_save_dir / 'pause.txt').exists():
-                pass
+                time.sleep(1)
             model.to(device)  # bring model back to gpu
