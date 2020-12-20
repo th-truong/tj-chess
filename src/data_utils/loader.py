@@ -5,8 +5,8 @@ import chess.pgn
 
 def stream_games(data, shard_index=None, total_shards=None):
     for path in os.listdir(data):
+        current_index = 0
         with open(os.path.join(data, path)) as f:
-            current_index = 0
             while True:
                 if total_shards is None or current_index % total_shards == shard_index:
                     game = chess.pgn.read_game(f)
