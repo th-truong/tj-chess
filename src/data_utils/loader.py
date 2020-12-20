@@ -1,16 +1,31 @@
 import os
 
-import chess
+import chess.pgn
 
 
-def stream_games(data):
+def stream_games(data, shard_index=None, total_shards=None):
+    for path in os.listdir(data):
+        with open(os.path.join(data, path)) as f:
+            current_index = 0
+            while True:
+                if total_shards is None or current_index % total_shards == shard_index:
+                    game = chess.pgn.read_game(f)
+                    if game is None:
+                        break
+                    yield game
+                else:
+                    chess.pgn.skip_game()
+                current_index += 1
+
+
+def stream_headers(data):
     for path in os.listdir(data):
         with open(os.path.join(data, path)) as f:
             while True:
-                game = chess.pgn.read_game(f)
-                if game is None:
+                headers = chess.pgn.read_headers(f)
+                if headers is None:
                     break
-                yield game
+                yield headers
 
 
 def stream_boards(game: chess.pgn.Game):
