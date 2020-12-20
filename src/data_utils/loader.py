@@ -1,12 +1,13 @@
 import os
 
 import chess.pgn
+from pathlib import Path
 
 
 def stream_games(data, shard_index=None, total_shards=None):
-    for path in os.listdir(data):
-        current_index = 0
-        with open(os.path.join(data, path)) as f:
+    current_index = 0
+    for path in list(Path(data).glob("*.pgn")):
+        with open(path) as f:
             while True:
                 if total_shards is None or current_index % total_shards == shard_index:
                     game = chess.pgn.read_game(f)
@@ -14,7 +15,7 @@ def stream_games(data, shard_index=None, total_shards=None):
                         break
                     yield game
                 else:
-                    game_found = chess.pgn.skip_game()
+                    game_found = chess.pgn.skip_game(f)
                     if not game_found:
                         break
                 current_index += 1
