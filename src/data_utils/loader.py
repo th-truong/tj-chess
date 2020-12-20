@@ -14,7 +14,9 @@ def stream_games(data, shard_index=None, total_shards=None):
                         break
                     yield game
                 else:
-                    chess.pgn.skip_game()
+                    game_found = chess.pgn.skip_game()
+                    if not game_found:
+                        break
                 current_index += 1
 
 
