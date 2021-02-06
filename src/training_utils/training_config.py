@@ -26,14 +26,16 @@ HISTORY = 8
 SIZE = (8, 8)
 
 # ********** Training Parameters ********** #
-LEARNING_RATE = 0.0001
-BATCH_SIZE = 2000
-LOADER_WORKERS = 1
+BATCH_SIZE = 2048
+LOADER_WORKERS = 8
 MAX_ITERATIONS = 500000
-WARM_UP_STEPS = 20000
+WARM_UP_STEPS = 5000
 SCHEDULER_PATIENCE = 10
 SCHEDULER_FACTOR = 0.5
-SAVE_FREQ = 2000
+SAVE_FREQ = 500
+
+MOVE_LOADER_KWARGS = {"opening_skip_percent": 0.80,
+                      "num_moves_to_skip": 12}
 
 OPTIMIZER = torch.optim.Adam
 OPTIMIZER_KWARGS = {'lr': 0.0002}
@@ -55,6 +57,7 @@ tj_train_config = {'history': HISTORY,
                    'value_module': VALUE_MODULE,
                    'value_module_kwargs': VALUE_MODULE_KWARGS,
                    # training configs
+                   'move_loader_kwargs': MOVE_LOADER_KWARGS,
                    'batch_size': BATCH_SIZE,
                    'loader_workers': LOADER_WORKERS,
                    'max_iterations': MAX_ITERATIONS,

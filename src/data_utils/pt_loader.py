@@ -12,7 +12,7 @@ from data_utils.loader import stream_games
 
 
 class MoveLoader(torch.utils.data.IterableDataset):
-    def __init__(self, dataset_path):
+    def __init__(self, dataset_path, opening_skip_percent=None, num_moves_to_skip=12):
         super(MoveLoader).__init__()
         if isinstance(dataset_path, str):
             dataset_path = Path(dataset_path)
@@ -25,35 +25,46 @@ class MoveLoader(torch.utils.data.IterableDataset):
         self.stream_games_fn = stream_games
         self.game_generator = None  # reassigned later
 
+        self.opening_skip_percent = opening_skip_percent
+        self.num_moves_to_skip = num_moves_to_skip
+        self.rng_gen = np.random.default_rng(2021)
+
     def __iter__(self):
         for game in self.game_generator:
-            while game is not None:
-                for meta_layer in layer_builder.game_to_layers(game):
-                    turn = meta_layer.meta.turn
+            if self.opening_skip_percent is not None:
+                skip_opening = True
+            else:
+                skip_opening = False
+            skipped_moves = 0
+            for meta_layer in layer_builder.game_to_layers(game):
+                if skip_opening and skipped_moves < 12:
+                    skipped_moves += 1
+                    continue
+                turn = meta_layer.meta.turn
+                if turn == chess.WHITE:
+                    self.move_interpreter.set_colour_to_play("white")
+                else:
+                    self.move_interpreter.set_colour_to_play("black")
+                next_move = torch.Tensor(self.move_interpreter.interpret_UCI_move(str(meta_layer.meta.next_move)))
+
+                # the result scalar will be [current player winning, draw, other player winning]
+                if meta_layer.meta.result == "1-0":
                     if turn == chess.WHITE:
-                        self.move_interpreter.set_colour_to_play("white")
+                        result = torch.Tensor([1, 0, 0])
                     else:
-                        self.move_interpreter.set_colour_to_play("black")
-                    next_move = torch.Tensor(self.move_interpreter.interpret_UCI_move(str(meta_layer.meta.next_move)))
-
-                    # the result scalar will be [current player winning, draw, other player winning]
-                    if meta_layer.meta.result == "1-0":
-                        if turn == chess.WHITE:
-                            result = torch.Tensor([1, 0, 0])
-                        else:
-                            result = torch.Tensor([0, 0, 1])
-                    elif meta_layer.meta.result == "0-1":
-                        if turn == chess.BLACK:
-                            result = torch.Tensor([1, 0, 0])
-                        else:
-                            result = torch.Tensor([0, 0, 1])
+                        result = torch.Tensor([0, 0, 1])
+                elif meta_layer.meta.result == "0-1":
+                    if turn == chess.BLACK:
+                        result = torch.Tensor([1, 0, 0])
                     else:
-                        result = torch.Tensor([0, 1, 0])
+                        result = torch.Tensor([0, 0, 1])
+                else:
+                    result = torch.Tensor([0, 1, 0])
 
-                    targets = {"next_move": next_move,
-                                "result": result}
-                    input_tensor = torch.from_numpy(meta_layer.layers.astype(np.float32))
-                    yield input_tensor, targets
+                targets = {"next_move": next_move,
+                           "result": result}
+                input_tensor = torch.from_numpy(meta_layer.layers.astype(np.float32))
+                yield input_tensor, targets
 
 
 def worker_init_fn(worker_id):
