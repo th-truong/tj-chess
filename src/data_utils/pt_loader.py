@@ -31,7 +31,8 @@ class MoveLoader(torch.utils.data.IterableDataset):
 
     def __iter__(self):
         for game in self.game_generator:
-            if self.opening_skip_percent is not None:
+            rand_num = self.rng_gen.uniform(low=0., high=1.)
+            if self.opening_skip_percent is not None and rand_num < self.opening_skip_percent:
                 skip_opening = True
             else:
                 skip_opening = False
