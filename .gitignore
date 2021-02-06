@@ -8,3 +8,4 @@ lichess_elite_db/
 *Database/
 data/
 *_tensorboard/
+*.code-workspace
