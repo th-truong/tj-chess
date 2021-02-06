@@ -51,9 +51,10 @@ def train_tj_chess(args):
     interpreter = noi.NetInterpreter()
 
     # load dataset objects
-    dataset = pt_loader.MoveLoader(args.lichess_db)
+    dataset = pt_loader.MoveLoader(args.chess_db, **cfg['move_loader_kwargs'])
     pt_dataloader = torch.utils.data.DataLoader(dataset, batch_size=cfg['batch_size'],
-                                                num_workers=cfg['loader_workers'], worker_init_fn=pt_loader.worker_init_fn)
+                                                num_workers=cfg['loader_workers'],
+                                                worker_init_fn=pt_loader.worker_init_fn)
 
     # configure training parameters
     if continue_training_flag:

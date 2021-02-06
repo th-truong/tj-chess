@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     parser_gui = subparsers.add_parser('gui')
     parser_gui.set_defaults(func=display_gui)
-    parser_gui.add_argument('--lichess-db', default=cfg.LICHESS_DB)
+    parser_gui.add_argument('--chess-db', default=cfg.CHESS_DB)
     parser_gui.add_argument('--model')
     parser_gui.add_argument('--training-cfg-dir')
     parser_gui.add_argument('--stockfish-exe', default=shutil.which('stockfish'))
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     parser_train.set_defaults(func=train_tj_chess)
     parser_train.add_argument('--log-dir', default=cfg.LOG_DIR)
     parser_train.add_argument('--training-cfg-dir', required=True, help='The config.py file to be used for training.')
-    parser_train.add_argument('--lichess-db', default=cfg.LICHESS_DB)
+    parser_train.add_argument('--chess-db', default=cfg.CHESS_DB)
 
     args = parser.parse_args()
 

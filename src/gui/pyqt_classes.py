@@ -15,7 +15,7 @@ from network_utils.engine import TjEngine
 
 
 class chessMainWindow(QMainWindow):
-    def __init__(self, lichess_db, stockfish=None, model=None, training_cfg_dir=None):
+    def __init__(self, chess_db, stockfish=None, model=None, training_cfg_dir=None):
         super().__init__()
 
         self.engines = []
@@ -32,7 +32,7 @@ class chessMainWindow(QMainWindow):
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
 
-        self.tab_widget = chessTabs(self, lichess_db, self.engines)
+        self.tab_widget = chessTabs(self, chess_db, self.engines)
         self.setCentralWidget(self.tab_widget)
 
     def closeEvent(self, event):
@@ -41,11 +41,11 @@ class chessMainWindow(QMainWindow):
 
 
 class chessTabs(QWidget):
-    def __init__(self, parent, lichess_db, engines):
+    def __init__(self, parent, chess_db, engines):
         super(QWidget, self).__init__(parent)
 
         self.tabs = QTabWidget()
-        viewer_tab = ViewerTab(self, lichess_db)
+        viewer_tab = ViewerTab(self, chess_db)
         player_tab = PlayerTab(self, engines)
 
         self.tabs.addTab(viewer_tab, "Viewer")
@@ -155,11 +155,11 @@ class PlayerTab(QWidget):
 
 
 class ViewerTab(QWidget):
-    def __init__(self, parent, lichess_db):
+    def __init__(self, parent, chess_db):
         super(QWidget, self).__init__(parent)
         layout = QGridLayout(self)
 
-        self.lichess_db = lichess_db
+        self.chess_db = chess_db
 
         self.setLayout(layout)
         self.current_game = None
@@ -217,7 +217,7 @@ class ViewerTab(QWidget):
 
     def open_file_btn_click(self):
         # get file path
-        fname = QFileDialog.getOpenFileName(self, 'Open file', str(self.lichess_db), "PGN files (*.pgn)")
+        fname = QFileDialog.getOpenFileName(self, 'Open file', str(self.chess_db), "PGN files (*.pgn)")
         fname = Path(str(fname[0]))
         self.pgn_file_txt.setText(str(fname))
 

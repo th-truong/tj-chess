@@ -13,7 +13,7 @@ def display_gui(args):
     app = QApplication(sys.argv)
 
     window = pyqt_classes.chessMainWindow(
-        args.lichess_db,
+        args.chess_db,
         stockfish=args.stockfish_exe,
         model=args.model,
         training_cfg_dir=args.training_cfg_dir
@@ -24,7 +24,7 @@ def display_gui(args):
 
 
 def python_chess_ex():
-    pgn = open(cfg.LICHESS_DB / "lichess_elite_2013-09.pgn", encoding="utf-8")
+    pgn = open(cfg.CHESS_DB / "lichess_elite_2013-09.pgn", encoding="utf-8")
 
     first_game = chess.pgn.read_game(pgn)
     second_game = chess.pgn.read_game(pgn)
