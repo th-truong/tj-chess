@@ -68,7 +68,7 @@ class PlayerTab(QWidget):
         super(QWidget, self).__init__(parent)
 
         self.engines = engines
-        self.current_engine = None
+        self.current_engine = engines[0]
 
         layout = QGridLayout(self)
 
@@ -77,7 +77,6 @@ class PlayerTab(QWidget):
         self.svg_widget.setGeometry(10, 10, 1000, 1000)
         layout.addWidget(self.svg_widget, 1, 0, 8, 8)
         self.board = chess.Board()
-        self.paint_board()
         # keeps track of current move number in game
         self.move_counter = 0
 
@@ -114,10 +113,12 @@ class PlayerTab(QWidget):
         layout.addWidget(self.current_game_moves_txt, 4, 8, 6, 7)
 
         self.setLayout(layout)
+        self.paint_board()
 
     def paint_board(self):
         self.board_SVG = chess.svg.board(self.board).encode('UTF-8')
         self.svg_widget.load(self.board_SVG)
+        self.analyse_position()
 
     def move_push(self):
         try:
@@ -143,7 +144,7 @@ class PlayerTab(QWidget):
         if not self.board.is_game_over():
             if self.current_engine is None:
                 return
-            result = self.current_engine.play(self.board, chess.engine.Limit(time=0.1))
+            result = self.current_engine.play(self.board, chess.engine.Limit(time=0.5))
             if result.move is not None:
                 self.board.push(result.move)
                 self.paint_board()
@@ -153,6 +154,14 @@ class PlayerTab(QWidget):
         # set game as current selected game from list and display it
         self.current_engine = self.engines[self.engine_list.currentRow()]
 
+    def analyse_position(self):
+        info_list = self.current_engine.analyse(self.board, chess.engine.Limit(time=0.1), multipv=5)
+        self.current_game_moves_txt.clear()
+        self.current_game_moves_txt.insertPlainText(str(info_list[0]['score']))
+        self.current_game_moves_txt.insertPlainText("\n\n")
+        for info in info_list:
+            self.current_game_moves_txt.insertPlainText(str(info['pv'][0]))
+            self.current_game_moves_txt.insertPlainText("\n\n")
 
 class ViewerTab(QWidget):
     def __init__(self, parent, chess_db):
