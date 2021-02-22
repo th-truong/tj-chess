@@ -9,3 +9,4 @@ lichess_elite_db/
 data/
 *_tensorboard/
 *.code-workspace
+src/.vscode/
