@@ -1,8 +1,8 @@
 import chess
 import torch
 import numpy as np
+from engine.mcts import mcts
 
-from network_utils.model_modules import create_tj_model
 from network_utils import network_out_interpreter as noi
 from network_utils.load_tj_model import load_tj_model
 from data_utils.layer_builder import board_to_all_layers
@@ -13,18 +13,22 @@ class TjEngine(object):
     not a real chess engine, but looks close enough for now
     """
 
-    def __init__(self, model):
+    def __init__(self, model, mode=None):
         self.model = model
         self.model.eval()
-        self.id = {'name': 'tj chess'}
+        self.id = {'name': 'tj chess (%s)' % mode}
         self.interpreter = noi.NetInterpreter()
+        self.mode = mode or 'policy'
 
-    def play(self, board, limit=None):
+    def play_policy(self, board, limit=None):
         layers = board_to_all_layers(board.copy())
         input_tensor = torch.from_numpy(layers.astype(np.float32)).unsqueeze(dim=0)
+        input_tensor = input_tensor.to(torch.device('cuda'))
         policy, value, _targets = self.model(input_tensor)
 
         self.interpreter.set_colour_to_play('white' if board.turn == chess.WHITE else 'black')
+
+        policy = policy.cpu()
 
         mask = torch.zeros_like(policy)
         for legal_move in board.legal_moves:
@@ -45,11 +49,17 @@ class TjEngine(object):
         result = chess.engine.PlayResult(move, None)
         return result
 
+    def play_value(self, board, limit=None):
+        move = mcts(board, self.model)
+        result = chess.engine.PlayResult(move, None)
+        return result
+
     def analyse(self, board, limit: chess.engine.Limit, multipv=5):
         self.interpreter.set_colour_to_play('white' if board.turn == chess.WHITE else 'black')
 
         layers = board_to_all_layers(board.copy())
         input_tensor = torch.from_numpy(layers.astype(np.float32)).unsqueeze(dim=0)
+        input_tensor = input_tensor.to(torch.device('cuda'))
         policy, value, _targets = self.model(input_tensor)
         policy = policy.cpu().detach().numpy()
         value = value.cpu().detach().numpy().squeeze()
@@ -67,11 +77,21 @@ class TjEngine(object):
 
         return info
 
+    def play(self, board, limit=None):
+        if self.mode == 'policy':
+            play = self.play_policy
+        elif self.mode == 'value':
+            play = self.play_value
+        else:
+            raise RuntimeError('unsupported play mode')
+        return play(board, limit=limit)
+
     def close(self):
         pass
 
     @classmethod
-    def load(cls, model_path):
+    def load(cls, model_path, mode=None):
         model = load_tj_model(weights_path=model_path)
+        model = model.to(torch.device('cuda'))
         model.eval()
-        return cls(model)
+        return cls(model, mode=mode)

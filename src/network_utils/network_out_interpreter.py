@@ -4,7 +4,7 @@
 
 class NetInterpreter():
 
-    def __init__(self):
+    def __init__(self, color='white'):
         """Class to interpret the tj-chess network outputs. Used to convert from UCI notation to tj-chess output notation.
 
             self.columns represent the a-h columns on the board, self.rows represents the 1-8 rows.
@@ -14,7 +14,7 @@ class NetInterpreter():
         """
         self.columns = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h']
         self.rows = ['1', '2', '3', '4', '5', '6', '7', '8']
-        self.colour = "white"
+        self.colour = color
 
         self.moves_list = self._move_mapping()
 

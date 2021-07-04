@@ -20,7 +20,8 @@ class chessMainWindow(QMainWindow):
 
         self.engines = []
         if model is not None:
-            self.engines.append(TjEngine.load(model))
+            self.engines.append(TjEngine.load(model, mode='policy'))
+            self.engines.append(TjEngine.load(model, mode='value'))
         if stockfish is not None:
             self.engines.append(chess.engine.SimpleEngine.popen_uci(stockfish))
 
