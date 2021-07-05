@@ -1,7 +1,7 @@
 import chess
 import torch
 import numpy as np
-from engine.mcts import mcts
+from engine.mcts import mcts, build_chess_state_simulator, expand_state_chess
 
 from network_utils import network_out_interpreter as noi
 from network_utils.load_tj_model import load_tj_model
@@ -50,7 +50,10 @@ class TjEngine(object):
         return result
 
     def play_value(self, board, limit=None):
-        move = mcts(board, self.model)
+        with torch.no_grad():
+            simulate_states_chess = build_chess_state_simulator(self.model)
+            uci, _value = mcts(board, expand_state_chess, simulate_states_chess)
+            move = chess.Move.from_uci(uci)
         result = chess.engine.PlayResult(move, None)
         return result
 
