@@ -39,7 +39,7 @@ def _select(node: Node) -> Node:
     return _select(child)
 
 
-def expand_state_chess(state) -> Dict[str, Any]:
+def expand_state_chess(state: chess.Board) -> Dict[str, chess.Board]:
     children = {}
     for move in state.legal_moves:
         # TODO: can we push/pop to aviod copies?
@@ -50,7 +50,7 @@ def expand_state_chess(state) -> Dict[str, Any]:
 
 
 def build_chess_state_simulator(model):
-    def simulate_states_chess(states: List[Any]):
+    def simulate_states_chess(states: List[chess.Board]) -> float:
         # TODO: this seems stupid an inefficient
         translation_start = time.time()
         pool = multiprocessing.Pool(8)
@@ -120,6 +120,7 @@ def mcts(
         for node, value in zip(child_nodes, child_values):
             node.value = value
         simulate_done = time.time()
+        print('simlated %d states' % len(child_nodes))
         print('simulate time: %s' % (simulate_done - simulate_start))
         backprop_start = time.time()
         for node in nodes:
