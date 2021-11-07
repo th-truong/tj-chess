@@ -12,7 +12,7 @@ import chess.pgn
 
 
 import config as cfg
-from scripts import display_gui
+from scripts import display_gui, benchmark
 from training_utils.train_tj_chess import train_tj_chess
 
 
@@ -32,6 +32,11 @@ if __name__ == "__main__":
     parser_train.add_argument('--log-dir', default=cfg.LOG_DIR)
     parser_train.add_argument('--training-cfg-dir', required=True, help='The config.py file to be used for training.')
     parser_train.add_argument('--chess-db', default=cfg.CHESS_DB)
+
+    parser_benchmark = subparsers.add_parser('benchmark')
+    parser_benchmark.set_defaults(func=benchmark)
+    parser_benchmark.add_argument('--model', required=True)
+    parser_benchmark.add_argument('-n', type=int, default=1)
 
     args = parser.parse_args()
 

@@ -11,20 +11,12 @@ from PyQt5.QtGui import QWheelEvent
 from pathlib import Path
 
 import config as cfg
-from network_utils.engine import TjEngine
 
 
 class chessMainWindow(QMainWindow):
-    def __init__(self, chess_db, stockfish=None, model=None, training_cfg_dir=None):
+    def __init__(self, chess_db, engines=None, training_cfg_dir=None):
         super().__init__()
-
-        self.engines = []
-        if model is not None:
-            self.engines.append(TjEngine.load(model, mode='policy'))
-            self.engines.append(TjEngine.load(model, mode='value'))
-        if stockfish is not None:
-            self.engines.append(chess.engine.SimpleEngine.popen_uci(stockfish))
-
+        self.engines = engines or []
         self.title = 'Chess Viewer and Player'
         self.left = 0
         self.top = 0

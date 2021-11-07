@@ -1,14 +1,13 @@
 from __future__ import annotations
 from typing import Any, Dict, Optional, List, Callable
-import multiprocessing
-import time
 
 import chess
 import random
+from numpy.lib.function_base import flip
 import torch
 import numpy as np
 
-from data_utils.layer_builder import board_to_all_layers
+from data_utils.layer_builder import board_to_all_layers, board_to_layers, flip_layers, HISTORY
 
 
 class Node:
@@ -49,25 +48,51 @@ def expand_state_chess(state: chess.Board) -> Dict[str, chess.Board]:
     return children
 
 
+def build_chess_state_expand(model):
+    def expand_states_chess(state: chess.Board) -> Dict[str, float]:
+        pass
+
+
+def node_to_all_layers(node):
+    hist_layers = []
+    cur = node
+    for i in range(HISTORY):
+        if cur is None:
+            hist_layers.extend(board_to_layers(None, None))
+        else:
+            if i % 2 == 0:
+                hist_layers.extend(cur.layers)                    
+            else:
+                hist_layers.extend(flip_layers(cur.layers))
+            cur = cur.parent
+    hist_layers = np.array(hist_layers)
+    return hist_layers
+
+
 def build_chess_state_simulator(model):
-    def simulate_states_chess(states: List[chess.Board]) -> float:
-        # TODO: this seems stupid an inefficient
-        translation_start = time.time()
-        pool = multiprocessing.Pool(8)
-        layers = np.array(pool.map(board_to_all_layers, (s.copy() for s in states)))
-        # layers = np.array([board_to_all_layers(n.board.copy()) for n in nodes])
-        translation_end = time.time()
-        tensor = torch.from_numpy(layers.astype(np.float32))
-        print('translation time: %s' % (translation_end - translation_start))
+    def simulate_states_chess(nodes: List[Node]) -> List[float]:
+        for node in nodes:
+            # TODO: jamming layers into the node is hacky
+            node.layers = board_to_layers(node.state, node.state.turn)
+
+        all_layers = []
+        for node in nodes:
+            all_layers.append(node_to_all_layers(node))
+        all_layers = np.array(all_layers)
+
+        tensor = torch.from_numpy(all_layers.astype(np.float32))
+
         tensor = tensor.to(torch.device('cuda'))
-        print(tensor.size())
-        print('start model')
+        torch.cuda.synchronize()
+
         _policies, values, _targets = model(tensor)
-        print('done model')
+        torch.cuda.synchronize()
+
         # split value of tie between players
         # this happens to weigh wins vs ties nicely
         # and allows us to treat this as a zero sum game
-        return [v[0] + (v[1] / 2) for v in values]
+        results = [v[0] + (v[1] / 2) for v in values]
+        return results
     return simulate_states_chess
 
 
@@ -94,15 +119,17 @@ def _back_propagate(node: Optional[Node]):
 def mcts(
     state: Any,
     expand_state: Callable[[Any], Dict[str, Any]],
-    simulate_states: Callable[[List[Any]], float],
+    simulate_states: Callable[[List[Node]], float],
     batches=10,
     batch_size=100
 ) -> str:
+
     root = Node(state, None)
+    values = simulate_states([root])
+    root.value = values[0]
 
     for i in range(batches):
         nodes = []
-        start_expand = time.time()
         for j in range(batch_size):
             node = _select(root)
             # kinda hacky, this will give us inconsistent batch sizes
@@ -112,21 +139,16 @@ def mcts(
             child_states = expand_state(node.state)
             node.children = {m: Node(s, None, node) for m, s in child_states.items()}
             nodes.append(node)
-        done_expand = time.time()
-        print('expand time: %s' % (done_expand - start_expand))
-        simulate_start = time.time()
+
         child_nodes = [c for n in nodes for c in n.children.values()]
-        child_values = simulate_states([c.state for c in child_nodes])
+        child_values = simulate_states(child_nodes)
+        print('simlated %d states' % len(child_nodes))
+
         for node, value in zip(child_nodes, child_values):
             node.value = value
-        simulate_done = time.time()
-        print('simlated %d states' % len(child_nodes))
-        print('simulate time: %s' % (simulate_done - simulate_start))
-        backprop_start = time.time()
+
         for node in nodes:
             _back_propagate(node)
-        backprop_done = time.time()
-        print('backprop time %s' % (backprop_done - backprop_start))
         print({m: c.value for m, c in root.children.items()})
         print('---')
 

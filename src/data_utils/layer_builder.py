@@ -50,6 +50,17 @@ def board_to_layers(board, turn):
     return board_layers
 
 
+def flip_layers(layers):
+    """
+    flips the layers produced by board_to_layers
+    """
+    flipped_layers = []
+    flipped_layers.extend(np.flipud(np.fliplr(l)) for l in layers[len(chess.PIECE_TYPES):len(chess.PIECE_TYPES)*2])
+    flipped_layers.extend(np.flipud(np.fliplr(l)) for l in layers[:len(chess.PIECE_TYPES)])
+    flipped_layers.extend(layers[len(chess.PIECE_TYPES)*2:])
+    return flipped_layers
+
+
 def board_to_all_layers(board):
     """
     WARNING!! this kills the board's move stack. please pass in a copy
