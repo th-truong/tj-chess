@@ -11,6 +11,7 @@ from PyQt5.QtGui import QWheelEvent
 from pathlib import Path
 
 import config as cfg
+from network_utils.engine import TjEngine
 
 
 class chessMainWindow(QMainWindow):
@@ -116,10 +117,13 @@ class PlayerTab(QWidget):
 
         menu_bar = QMenuBar()
         file_menu = menu_bar.addMenu("File")
-        load_action = file_menu.addAction("Load PGN")
-        load_action.triggered.connect(self.pgn_load_btn_click)
-        save_action = file_menu.addAction("Save PGN")
-        save_action.triggered.connect(self.pgn_save_btn_click)
+        load_pgn_action = file_menu.addAction("Load PGN")
+        load_pgn_action.triggered.connect(self.pgn_load_btn_click)
+        save_pgn_action = file_menu.addAction("Save PGN")
+        save_pgn_action.triggered.connect(self.pgn_save_btn_click)
+        file_menu.addSeparator()
+        load_model_action = file_menu.addAction("Load Model")
+        load_model_action.triggered.connect(self.load_model_click)
 
         main_layout = QHBoxLayout()
         main_layout.setMenuBar(menu_bar)
@@ -202,6 +206,17 @@ class PlayerTab(QWidget):
             return
         with open(name, 'w') as f:
             print(game, file=f, end='\n\n')
+    
+    def load_model_click(self):
+        name, _ = QFileDialog.getOpenFileName(self, caption='Load Model', filter='TAR files (*.tar)')
+        if name == '':
+            return
+        for engine in (
+            TjEngine.load(name, mode='policy'),
+            TjEngine.load(name, mode='value'),
+        ):
+            self.engine_list.insertItem(len(self.engines), engine.id['name'])
+            self.engines.append(engine)
 
 
 class ViewerTab(QWidget):

@@ -1,3 +1,5 @@
+import os.path
+
 import chess
 import torch
 import numpy as np
@@ -13,10 +15,10 @@ class TjEngine(object):
     not a real chess engine, but looks close enough for now
     """
 
-    def __init__(self, model, mode=None):
+    def __init__(self, model, name=None, mode=None):
         self.model = model
         self.model.eval()
-        self.id = {'name': 'tj chess (%s)' % mode}
+        self.id = {'name': f'tj{f" - {name}" if name is not None else ""}{f" ({mode})" if mode is not None else ""}'}
         self.interpreter = noi.NetInterpreter()
         self.mode = mode or 'policy'
 
@@ -93,8 +95,10 @@ class TjEngine(object):
         pass
 
     @classmethod
-    def load(cls, model_path, mode=None):
+    def load(cls, model_path, name=None, mode=None):
         model = load_tj_model(weights_path=model_path)
         model = model.to(torch.device('cuda'))
         model.eval()
-        return cls(model, mode=mode)
+        if name is None:
+            name = os.path.basename(model_path)
+        return cls(model, name=name, mode=mode)
