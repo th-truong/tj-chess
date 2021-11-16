@@ -32,7 +32,7 @@ def _select(node: Node) -> Node:
         return None
     move = random.choices(
         population=[m for m in node.children],
-        weights=[c.value for c in node. children.values()],
+        weights=[1-c.value for c in node. children.values()],
     )[0]
     child = node.children[move]
     return _select(child)
