@@ -3,26 +3,59 @@ import os.path
 import chess
 import torch
 import numpy as np
-from engine.mcts import mcts, build_chess_state_simulator, expand_state_chess
+from engine.mcts import mcts, Node, build_chess_state_simulator, expand_state_chess
 
 from network_utils import network_out_interpreter as noi
 from network_utils.load_tj_model import load_tj_model
 from data_utils.layer_builder import board_to_all_layers
 
 
-class TjEngine(object):
+class TjMctsEngine:
+    def __init__(self, model, name=None):
+        self.model = model
+        self.model.eval()
+        self.id = {'name': f'tj mcts - {name}'}
+        self.root = None
+
+    def analyse(self, board, limit: chess.engine.Limit, multipv=5):
+        return []
+
+    def play(self, board, limit=None):
+        if self.root is None or self.root.state != board:
+            self.root = Node(board, None)
+        with torch.no_grad():
+            simulate_states_chess = build_chess_state_simulator(self.model)
+            uci, _value = mcts(self.root, expand_state_chess, simulate_states_chess)
+        self.root = self.root.children[uci]
+        self.root.parent = None
+        move = chess.Move.from_uci(uci)
+        result = chess.engine.PlayResult(move, None)
+        return result
+
+    def close(self):
+        pass
+
+    @classmethod
+    def load(cls, model_path, name=None):
+        model = load_tj_model(weights_path=model_path)
+        model = model.to(torch.device('cuda'))
+        model.eval()
+        if name is None:
+            name = os.path.basename(model_path)
+        return cls(model, name=name)
+
+
+class TjPolicyEngine(object):
     """
     not a real chess engine, but looks close enough for now
     """
-
-    def __init__(self, model, name=None, mode=None):
+    def __init__(self, model, name=None):
         self.model = model
         self.model.eval()
-        self.id = {'name': f'tj{f" - {name}" if name is not None else ""}{f" ({mode})" if mode is not None else ""}'}
+        self.id = {'name': f'tj policy - {name}'}
         self.interpreter = noi.NetInterpreter()
-        self.mode = mode or 'policy'
 
-    def play_policy(self, board, limit=None):
+    def play(self, board, limit=None):
         layers = board_to_all_layers(board.copy())
         input_tensor = torch.from_numpy(layers.astype(np.float32)).unsqueeze(dim=0)
         input_tensor = input_tensor.to(torch.device('cuda'))
@@ -51,14 +84,6 @@ class TjEngine(object):
         result = chess.engine.PlayResult(move, None)
         return result
 
-    def play_value(self, board, limit=None):
-        with torch.no_grad():
-            simulate_states_chess = build_chess_state_simulator(self.model)
-            uci, _value = mcts(board, expand_state_chess, simulate_states_chess)
-            move = chess.Move.from_uci(uci)
-        result = chess.engine.PlayResult(move, None)
-        return result
-
     def analyse(self, board, limit: chess.engine.Limit, multipv=5):
         self.interpreter.set_colour_to_play('white' if board.turn == chess.WHITE else 'black')
 
@@ -82,23 +107,14 @@ class TjEngine(object):
 
         return info
 
-    def play(self, board, limit=None):
-        if self.mode == 'policy':
-            play = self.play_policy
-        elif self.mode == 'value':
-            play = self.play_value
-        else:
-            raise RuntimeError('unsupported play mode')
-        return play(board, limit=limit)
-
     def close(self):
         pass
 
     @classmethod
-    def load(cls, model_path, name=None, mode=None):
+    def load(cls, model_path, name=None):
         model = load_tj_model(weights_path=model_path)
         model = model.to(torch.device('cuda'))
         model.eval()
         if name is None:
             name = os.path.basename(model_path)
-        return cls(model, name=name, mode=mode)
+        return cls(model, name=name)

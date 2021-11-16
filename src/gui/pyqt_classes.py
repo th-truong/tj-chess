@@ -11,7 +11,7 @@ from PyQt5.QtGui import QWheelEvent
 from pathlib import Path
 
 import config as cfg
-from network_utils.engine import TjEngine
+from network_utils.engine import TjMctsEngine, TjPolicyEngine
 
 
 class chessMainWindow(QMainWindow):
@@ -170,6 +170,8 @@ class PlayerTab(QWidget):
     def analyse_position(self):
         info_list = self.current_engine.analyse(self.board, chess.engine.Limit(time=0.1), multipv=5)
         self.engine_move_info.clear()
+        if info_list is None or len(info_list) == 0:
+            return
         self.engine_move_info.insertPlainText(str(info_list[0]['score']))
         self.engine_move_info.insertPlainText("\n\n")
         for info in info_list:
@@ -212,8 +214,8 @@ class PlayerTab(QWidget):
         if name == '':
             return
         for engine in (
-            TjEngine.load(name, mode='policy'),
-            TjEngine.load(name, mode='value'),
+            TjPolicyEngine.load(name),
+            TjMctsEngine.load(name),
         ):
             self.engine_list.insertItem(len(self.engines), engine.id['name'])
             self.engines.append(engine)

@@ -122,14 +122,12 @@ def _back_propagate(node: Optional[Node]):
 
 
 def mcts(
-    state: Any,
+    root: Node,
     expand_state: Callable[[Any], Dict[str, Any]],
     simulate_states: Callable[[List[Node]], float],
     batches=10,
     batch_size=100
 ) -> str:
-
-    root = Node(state, None)
     values = simulate_states([root])
     root.value = values[0]
 

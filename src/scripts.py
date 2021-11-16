@@ -7,7 +7,7 @@ import chess.pgn
 
 import config as cfg
 from gui import pyqt_classes
-from network_utils.engine import TjEngine
+from network_utils.engine import TjMctsEngine, TjPolicyEngine
 
 
 def display_gui(args):
@@ -15,8 +15,8 @@ def display_gui(args):
 
     engines = []
     if args.model is not None:
-        engines.append(TjEngine.load(args.model, mode='policy'))
-        engines.append(TjEngine.load(args.model, mode='value'))
+        engines.append(TjMctsEngine.load(args.model))
+        engines.append(TjPolicyEngine.load(args.model))
     if args.stockfish_exe is not None:
         engines.append(chess.engine.SimpleEngine.popen_uci(args.stockfish_exe))
 
@@ -32,7 +32,7 @@ def display_gui(args):
 
 def benchmark(args):
     board = chess.Board()
-    engine = TjEngine.load(args.model, mode='value')
+    engine = TjMctsEngine.load(args.model)
     for i in range(args.n):
         print(f'turn {i}')
         result = engine.play(board, chess.engine.Limit(time=0.5))
