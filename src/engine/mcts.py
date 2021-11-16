@@ -101,6 +101,22 @@ def build_chess_state_simulator(model):
     return simulate_states_chess
 
 
+def count_nodes(node):
+    return sum(count_nodes(c) for c in node.children.values()) + 1
+
+
+def build_chess_limit_search(limit):
+    def limit_search_chess(root):
+        if limit is None:
+            return False
+        if limit.nodes is not None:
+            num_nodes = count_nodes(root)
+            if num_nodes > limit.nodes:
+                return True
+        return False
+    return limit_search_chess
+
+
 def _back_propagate(node: Optional[Node]):
     if node is None:
         # reached the top
@@ -125,6 +141,7 @@ def mcts(
     root: Node,
     expand_state: Callable[[Any], Dict[str, Any]],
     simulate_states: Callable[[List[Node]], float],
+    limit_search: Optional[Callable[[Node], bool]] = None,
     batches=10,
     batch_size=100
 ) -> str:
@@ -132,6 +149,9 @@ def mcts(
     root.value = values[0]
 
     for i in range(batches):
+        if limit_search is not None and limit_search(root):
+            break
+
         nodes = []
         for j in range(batch_size):
             node = _select(root)
