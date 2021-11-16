@@ -2,7 +2,7 @@ import sys
 import importlib.util
 
 import chess
-from PyQt5.QtWidgets import (QInputDialog, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QPushButton,
+from PyQt5.QtWidgets import (QInputDialog, QMenuBar, QWidget, QGridLayout, QVBoxLayout, QHBoxLayout, QPushButton,
                              QLabel, QTextEdit, QLineEdit, QFileDialog, QApplication,
                              QListWidget, QPlainTextEdit, QMainWindow, QTabWidget,
                              QCheckBox)
@@ -94,10 +94,6 @@ class PlayerTab(QWidget):
         pgn_save_btn = QPushButton("Save")
         pgn_save_btn.clicked.connect(self.pgn_save_btn_click)
 
-        pgn_file_layout = QHBoxLayout()
-        pgn_file_layout.addWidget(pgn_load_btn)
-        pgn_file_layout.addWidget(pgn_save_btn)
-
         # SVG display for board
         self.svg_widget = QSvgWidget()
 
@@ -115,11 +111,18 @@ class PlayerTab(QWidget):
         player_move_layout.addWidget(player_move_btn)
 
         board_layout = QVBoxLayout()
-        board_layout.addLayout(pgn_file_layout)
         board_layout.addWidget(self.svg_widget)
         board_layout.addLayout(player_move_layout)
 
+        menu_bar = QMenuBar()
+        file_menu = menu_bar.addMenu("File")
+        load_action = file_menu.addAction("Load PGN")
+        load_action.triggered.connect(self.pgn_load_btn_click)
+        save_action = file_menu.addAction("Save PGN")
+        save_action.triggered.connect(self.pgn_save_btn_click)
+
         main_layout = QHBoxLayout()
+        main_layout.setMenuBar(menu_bar)
         main_layout.addLayout(board_layout)
         main_layout.addLayout(engine_layout)
 
