@@ -58,14 +58,16 @@ def node_to_all_layers(node):
     cur = node
     for i in range(HISTORY):
         if cur is None:
-            hist_layers.extend(board_to_layers(None, None))
+            break
+        # if cur is None:
+        #     hist_layers.extend(board_to_layers(None, None))
         else:
             if i % 2 == 0:
                 hist_layers.extend(cur.layers)                    
             else:
                 hist_layers.extend(flip_layers(cur.layers))
             cur = cur.parent
-    hist_layers = np.array(hist_layers)
+    hist_layers = np.array(hist_layers[:112])
     return hist_layers
 
 
@@ -73,7 +75,10 @@ def build_chess_state_simulator(model):
     def simulate_states_chess(nodes: List[Node]) -> List[float]:
         for node in nodes:
             # TODO: jamming layers into the node is hacky
-            node.layers = board_to_layers(node.state, node.state.turn)
+            if node.parent is None:
+                node.layers = board_to_all_layers(node.state.copy())
+            else:
+                node.layers = board_to_layers(node.state, node.state.turn)
 
         all_layers = []
         for node in nodes:
@@ -91,7 +96,7 @@ def build_chess_state_simulator(model):
         # split value of tie between players
         # this happens to weigh wins vs ties nicely
         # and allows us to treat this as a zero sum game
-        results = [v[0] + (v[1] / 2) for v in values]
+        results = [(v[0] + (v[1] / 2)).item() for v in values]
         return results
     return simulate_states_chess
 

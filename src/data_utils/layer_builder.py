@@ -9,6 +9,7 @@ from training_utils.training_config import tj_train_config
 HISTORY = tj_train_config['history']
 SIZE = tj_train_config['size']
 REPETITIONS = 2
+NUM_BOARD_LAYERS = len(chess.COLORS) * len(chess.PIECE_TYPES) + REPETITIONS
 
 
 class MetaLayers(object):
@@ -26,7 +27,7 @@ class Meta(object):
 
 def board_to_layers(board, turn):
     if board is None:
-        return [np.zeros(SIZE) for _ in range(len(chess.COLORS) * len(chess.PIECE_TYPES) + REPETITIONS)]
+        return [np.zeros(SIZE) for _ in range(NUM_BOARD_LAYERS)]
 
     if turn == chess.WHITE:
         colors = [chess.WHITE, chess.BLACK]
@@ -55,9 +56,11 @@ def flip_layers(layers):
     flips the layers produced by board_to_layers
     """
     flipped_layers = []
-    flipped_layers.extend(np.flipud(np.fliplr(l)) for l in layers[len(chess.PIECE_TYPES):len(chess.PIECE_TYPES)*2])
-    flipped_layers.extend(np.flipud(np.fliplr(l)) for l in layers[:len(chess.PIECE_TYPES)])
-    flipped_layers.extend(layers[len(chess.PIECE_TYPES)*2:])
+    for i in range(0, len(layers), NUM_BOARD_LAYERS):
+        board_layers = layers[i:i+NUM_BOARD_LAYERS]
+        flipped_layers.extend(np.flipud(np.fliplr(l)) for l in board_layers[len(chess.PIECE_TYPES):len(chess.PIECE_TYPES)*2])
+        flipped_layers.extend(np.flipud(np.fliplr(l)) for l in board_layers[:len(chess.PIECE_TYPES)])
+        flipped_layers.extend(board_layers[len(chess.PIECE_TYPES)*2:])
     return flipped_layers
 
 
