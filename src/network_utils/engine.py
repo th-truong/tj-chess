@@ -3,7 +3,7 @@ import os.path
 import chess
 import torch
 import numpy as np
-from engine.mcts import mcts, Node, build_chess_state_simulator, expand_state_chess, build_chess_limit_search
+from engine.mcts import mcts, Node, build_chess_state_simulator, expand_node_chess, build_chess_limit_search
 
 from network_utils import network_out_interpreter as noi
 from network_utils.load_tj_model import load_tj_model
@@ -22,11 +22,11 @@ class TjMctsEngine:
 
     def play(self, board, limit=None):
         if self.root is None or self.root.state != board:
-            self.root = Node(board, None)
+            self.root = Node(board, None, cache={})
         with torch.no_grad():
             simulate_states_chess = build_chess_state_simulator(self.model)
             limit_search_chess = build_chess_limit_search(chess.engine.Limit(nodes=20000))
-            uci, _value = mcts(self.root, expand_state_chess, simulate_states_chess, limit_search=limit_search_chess)
+            uci, _value = mcts(self.root, expand_node_chess, simulate_states_chess, limit_search=limit_search_chess)
         self.root = self.root.children[uci]
         self.root.parent = None
         move = chess.Move.from_uci(uci)
