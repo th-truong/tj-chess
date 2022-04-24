@@ -17,11 +17,13 @@ class Node:
         value: Optional[float],
         parent: Optional[Node] = None,
         children: Dict[str, Node] = None,
+        cache: Any = None,
     ):
         self.state = state
         self.value = value
         self.parent = parent
         self.children = children or {}
+        self.cache = cache
 
 
 def _select(node: Node) -> Node:
@@ -38,13 +40,14 @@ def _select(node: Node) -> Node:
     return _select(child)
 
 
-def expand_state_chess(state: chess.Board) -> Dict[str, chess.Board]:
+def expand_node_chess(node: Node) -> Dict[str, Node]:
     children = {}
-    for move in state.legal_moves:
+    for move in node.state.legal_moves:
         # TODO: can we push/pop to aviod copies?
-        board = state.copy()
+        board = node.state.copy()
         board.push(move)
-        children[move.uci()] = board
+        child_node = Node(board, None, parent=node, cache={})
+        children[move.uci()] = child_node
     return children
 
 
@@ -63,9 +66,9 @@ def node_to_all_layers(node):
         #     hist_layers.extend(board_to_layers(None, None))
         else:
             if i % 2 == 0:
-                hist_layers.extend(cur.layers)                    
+                hist_layers.extend(cur.cache['layers'])
             else:
-                hist_layers.extend(flip_layers(cur.layers))
+                hist_layers.extend(flip_layers(cur.cache['layers']))
             cur = cur.parent
     hist_layers = np.array(hist_layers[:112])
     return hist_layers
@@ -76,9 +79,9 @@ def build_chess_state_simulator(model):
         for node in nodes:
             # TODO: jamming layers into the node is hacky
             if node.parent is None:
-                node.layers = board_to_all_layers(node.state.copy())
+                node.cache['layers'] = board_to_all_layers(node.state.copy())
             else:
-                node.layers = board_to_layers(node.state, node.state.turn)
+                node.cache['layers'] = board_to_layers(node.state, node.state.turn)
 
         all_layers = []
         for node in nodes:
@@ -139,7 +142,7 @@ def _back_propagate(node: Optional[Node]):
 
 def mcts(
     root: Node,
-    expand_state: Callable[[Any], Dict[str, Any]],
+    expand_node: Callable[[Node], Dict[str, Node]],
     simulate_states: Callable[[List[Node]], float],
     limit_search: Optional[Callable[[Node], bool]] = None,
     batches=10,
@@ -159,8 +162,7 @@ def mcts(
             # TODO: maybe eval blindly instead?
             if node is None:
                 continue
-            child_states = expand_state(node.state)
-            node.children = {m: Node(s, None, node) for m, s in child_states.items()}
+            node.children = expand_node(node)
             nodes.append(node)
 
         child_nodes = [c for n in nodes for c in n.children.values()]
