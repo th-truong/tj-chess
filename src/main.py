@@ -18,7 +18,7 @@ from training_utils.train_tj_chess import train_tj_chess
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers()
+    subparsers = parser.add_subparsers(dest='command', required=True)
 
     parser_gui = subparsers.add_parser('gui')
     parser_gui.set_defaults(func=display_gui)
