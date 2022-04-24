@@ -63,7 +63,7 @@ def node_to_all_layers(node):
         #     hist_layers.extend(board_to_layers(None, None))
         else:
             if i % 2 == 0:
-                hist_layers.extend(cur.layers)                    
+                hist_layers.extend(cur.layers)
             else:
                 hist_layers.extend(flip_layers(cur.layers))
             cur = cur.parent
